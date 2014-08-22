@@ -4,16 +4,12 @@
     require("common.php"); 
      
     // At the top of the page we check to see whether the user is logged in or not 
-    if(empty($_SESSION['user'])) 
+    if(!empty($_SESSION['user'])) 
     { 
-        // If they are not, we redirect them to the signin page. 
-        header("Location: signin.php"); 
-         
-        // Remember that this die statement is absolutely critical.  Without it, 
-        // people can view your members-only content without logging in. 
-        die("Redirecting to signin.php"); 
+		header("Location: main.php"); 
+        die("Redirecting to: main.php"); 
     } 
-    
+     
     // Everything below this point in the file is secured by the signin system 
      
     // We can display the user's username to them by reading it from the session array.  Remember that because 
@@ -39,6 +35,10 @@
 	<script src="js/bootstrap.min.js"></script>
 	<script type="text/javascript">
 	$(document).ready(function() {
+		document.getElementById("signInButton").onclick = function () {
+			location.href = "signin.php";
+		};
+		
 		$.ajaxSetup({
 			beforeSend: function() {
 				$('#loading-indicator').show();
@@ -50,13 +50,11 @@
 	});
 	</script>
 </head>
-<body class="<?php echo htmlentities($_SESSION['user']['background_class'], ENT_QUOTES, 'UTF-8'); ?>">
+<body class="lighted-night-background">
 	<header>
 		<nav class="navbar navbar-transparent navbar-fixed-top" role="navigation">
 			<div class="container-fluid">
 			  <ul class="nav navbar-nav">
-				<li><p class="navbar-text"><input id="autosaveCheckbox" type="checkbox"> Auto-save</p></li>
-				<li><button id='saveButton' class="btn btn-default navbar-btn">Save Now</button></li>
 				<li><button id='exportButton' class="btn btn-default navbar-btn">Export</button></li>
 				<li><span class="btn btn-default navbar-btn btn-file">Import<input type="file" id='importFileInput' accept=".txt"></span></li>
 				<li><button id='clearAllButton' class="btn btn-default navbar-btn">Clear All</button></li>
@@ -65,13 +63,12 @@
 			  </ul>
 			  <ul class="nav navbar-nav navbar-right container-fluid">
 				<li><img src="assets/loading.gif" id="loading-indicator" style="display:none" /></li>
-				<li><p class="navbar-text">Signed in as <b><?php echo htmlentities($_SESSION['user']['username'], ENT_QUOTES, 'UTF-8'); ?></b></p></li>
-				<li><button id='editAccountButton' class="btn btn-default navbar-btn" onclick="location.href = 'edit-account.php'">Edit Account</button></li>
-				<li><button id='signOutButton' class="btn btn-default navbar-btn" onclick="location.href = 'signout.php'">Sign Out</button></li>
+				<li><p class="navbar-text">Sign in for more options</p><button id='signInButton' type="submit" class="btn btn-default navbar-btn">Sign In</button></li>
 			  </ul>
 			</div><!-- /.container-fluid -->
 		</nav>
 		<h1>Task List</h1>
+		<div class="text-center">Warning, all data is lost on page change.  Export your data!</div>
 	</header>
 	<div id='taskListContainer' class="container narrow">
 		<div id="addTask">

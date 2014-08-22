@@ -4,9 +4,26 @@ header, section {
 	color: #fff;
 }
 
-body {
+.lighted-night-background {
 	background-image:url('../assets/blurred_background.jpg');
 }
+.dark-gray-background {
+	background-color:rgb(49, 49, 54);
+}
+.light-gray-background {
+	background-color:whitesmoke;
+}
+.peach-background {
+	background-color:rgb(255, 236, 189);
+}
+.sky-blue-background {
+	background-color:aliceblue;
+}
+.white-background {
+	background-color:white;
+}
+
+
 h1, h2 {
 	text-align: center;
 	font-weight: normal;
@@ -18,12 +35,33 @@ footer {
 	font-weight: normal;
 }
 
-.improvement-list{
+.statistics-list{
 	background: rgba(255,255,255,0.9);
 	border: 1px solid #CCC;
 	border-radius: 20px;
+	padding-top: 10px;
 	padding-bottom: 10px;
 	margin-bottom: 30px;
+}
+
+.task-count {
+	display: inline-block;
+	margin-left: 5px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	height: 20px;
+	padding-left:3px;
+	padding-right:3px;
+}
+
+.new-task-count {
+	background: rgba(255,255,255,0.95);
+}
+.started-task-count {
+	background: rgba(255,255,170,0.95);
+}
+.completed-task-count {
+	background: rgba(212,255,170,0.95);
 }
 
 .sortable{

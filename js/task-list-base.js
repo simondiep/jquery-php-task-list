@@ -321,6 +321,24 @@ $(function() {
 	}
 	
 	/**
+	 * Focuses and sets the caret at the end of the element
+	 */
+	var setCaretAtEnd = function(element){
+		element.focus();
+		// If this function exists...
+		if (element.setSelectionRange) {
+		  // ... then use it (Doesn't work in IE)
+		  // Double the length because Opera is inconsistent about whether a carriage return is one character or two. Sigh.
+		  var len = element.val().length * 2;
+		  element.setSelectionRange(len, len);
+		} else {
+		// ... otherwise replace the contents with itself
+		// (Doesn't work in Google Chrome)
+		  element.val(element.val());
+		}
+	}
+	
+	/**
 	 * Gets the task list data from the server and stores it into local storage
 	 */
 	var loadData = function(){
@@ -336,7 +354,7 @@ $(function() {
 		// callback handler that will be called on success
 		request.done(function (response, textStatus, jqXHR){
 			if(response) {
-				console.log('loadData json received');
+				console.log('loadData json received ');
 				var jsonResponse = JSON.parse(response);
 				setTaskList(JSON.parse(jsonResponse.task_list_string));
 				setTaskListOrder(JSON.parse(jsonResponse.task_order_string));
@@ -356,6 +374,32 @@ $(function() {
 				textStatus, errorThrown
 			);
 		});
+	}
+	
+	var updateStatistics = function() {
+		var taskList = getTaskList();
+		var newTaskCount = 0;
+		var startedTaskCount = 0;
+		var completedTaskCount = 0;
+		if(taskList){
+			$.each(taskList, function( id, task ) {
+				switch(task.state) {
+					case 'new':
+						newTaskCount++;
+						break;
+					case 'started':
+						startedTaskCount++;
+						break;
+					case 'completed':
+						completedTaskCount++;
+						break;
+				}
+			});
+		}
+		$('#statsNewTaskCount').text(newTaskCount);
+		$('#statsStartedTaskCount').text(startedTaskCount);
+		$('#statsCompletedTaskCount').text(completedTaskCount);
+		$('#statsTotalTaskCount').text(newTaskCount+startedTaskCount+completedTaskCount);
 	}
 	
 	/**
@@ -378,7 +422,7 @@ $(function() {
 	localStorage.setItem('taskListIndex',-1);
 	localStorage.setItem('taskListOrderIndex',-1);
 	loadData();
-	
+	updateStatistics();
 	/* Populate the task list from local storage */
 	var populateTaskList = function() {
 		taskList = getTaskList();
@@ -541,8 +585,8 @@ $(function() {
 		}
 	});
 	
-	/* Hook up the Start Over button */
-	$('#startOverButton').click(function (e) {
+	/* Hook up the Clear All button */
+	$('#clearAllButton').click(function (e) {
 		e.preventDefault();
 		setTaskList({});
 		setTaskListOrder({});
@@ -604,7 +648,7 @@ $(function() {
 				taskLabel.text('');
 				taskLabel.append("<div id='removableDiv'><input id='editTaskLabel' class='sortable-input' value='"+originalText+"'></input></div>");
 				var inputField = taskLabel.find('.sortable-input');
-				inputField.focus();
+				setCaretAtEnd(inputField);
 				
 				//change the input field back to a label
 				var replaceInputAndSave = function(){

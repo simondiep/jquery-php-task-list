@@ -195,49 +195,51 @@
 	<link rel="stylesheet" href="css/index.css" />
 	<link rel="icon" href="assets/favicon.ico" type="image/x-icon" />
 </head> 
-<header>
-	<h1>Register</h1> 
-</header>
-<div class="container-narrow jumbotron">
-	<form action="register.php" method="post"> 
-		<?php if (!empty($ERROR_USERNAME)) : ?>
-			<span class="validation-message"><?php echo htmlentities($ERROR_USERNAME, ENT_QUOTES, 'UTF-8'); ?></span>
-		<?php endif; ?>
-		<div class="form-group">
-			<label class="sr-only" for="usernameTextField">Username</label>
-			<input name="username" type="text" class="form-control" id="usernameTextField" placeholder="Username" value="" pattern=".{3,}" required title="3 character minimum">
-		</div>
-		<?php if (!empty($ERROR_EMAIL)) : ?>
-			<span class="validation-message"><?php echo htmlentities($ERROR_EMAIL, ENT_QUOTES, 'UTF-8'); ?></span>
-		<?php endif; ?>
-		<div class="form-group">
-			<label class="sr-only" for="emailTextField">Email Address</label>
-			<input name="email" type="email" class="form-control" id="emailTextField" placeholder="Email Address" value="" required>
-		</div>
-		<?php if (!empty($ERROR_PASSWORD)) : ?>
-			<span class="validation-message"><?php echo htmlentities($ERROR_PASSWORD, ENT_QUOTES, 'UTF-8'); ?></span>
-		<?php endif; ?>
-		<div class="form-group">
-			<label class="sr-only" for="passwordTextField">Password</label>
-			<input name="password" type="password" class="form-control" id="passwordTextField" placeholder="Password" value="" pattern=".{8,}" required title="8 character minimum">
-		</div>
-		<div class="form-group">
-			<label class="sr-only" for="captchaTextField">Enter the text from the image</label>
-			<div class="row">
-				<div class="col-xs-4">
-					<input name="captcha" type="text" class="form-control" id="captchaTextField" placeholder="Enter code" value="" value="" required>
-				</div>
-				<div class="col-xs-3">
-					<img src="captcha.php" class="form-control" />
-				</div>
-				<?php if (!empty($ERROR_CAPTCHA)) : ?>
-					<div class="col-xs-5">
-						<span class="validation-message"><?php echo htmlentities($ERROR_CAPTCHA, ENT_QUOTES, 'UTF-8'); ?></span>
-					</div>
-				<?php endif; ?>
+<body class="lighted-night-background">
+	<header>
+		<h1>Register</h1> 
+	</header>
+	<div class="container-narrow jumbotron">
+		<form action="register.php" method="post"> 
+			<?php if (!empty($ERROR_USERNAME)) : ?>
+				<span class="validation-message"><?php echo htmlentities($ERROR_USERNAME, ENT_QUOTES, 'UTF-8'); ?></span>
+			<?php endif; ?>
+			<div class="form-group">
+				<label class="sr-only" for="usernameTextField">Username</label>
+				<input name="username" type="text" class="form-control" id="usernameTextField" placeholder="Username" value="" pattern=".{3,}" required title="3 character minimum"/>
 			</div>
-		</div>
-		<button id='registerButton' type="submit" class="btn btn-default pull-right">Register</button>
-	</form>
-	<button id='backToLoginButton' class="btn btn-default pull-left" onclick="location.href = 'signin.php'">Back to Sign in</button>
-</div>
+			<?php if (!empty($ERROR_EMAIL)) : ?>
+				<span class="validation-message"><?php echo htmlentities($ERROR_EMAIL, ENT_QUOTES, 'UTF-8'); ?></span>
+			<?php endif; ?>
+			<div class="form-group">
+				<label class="sr-only" for="emailTextField">Email Address</label>
+				<input name="email" type="email" class="form-control" id="emailTextField" placeholder="Email Address" value="" required/>
+			</div>
+			<?php if (!empty($ERROR_PASSWORD)) : ?>
+				<span class="validation-message"><?php echo htmlentities($ERROR_PASSWORD, ENT_QUOTES, 'UTF-8'); ?></span>
+			<?php endif; ?>
+			<div class="form-group">
+				<label class="sr-only" for="passwordTextField">Password</label>
+				<input name="password" type="password" class="form-control" id="passwordTextField" placeholder="Password" value="" pattern=".{8,}" required title="8 character minimum"/>
+			</div>
+			<div class="form-group">
+				<label class="sr-only" for="captchaTextField">Enter the text from the image</label>
+				<div class="row">
+					<div class="col-xs-4">
+						<input name="captcha" type="text" class="form-control" id="captchaTextField" placeholder="Enter code" value="" value="" required/>
+					</div>
+					<div class="col-xs-3">
+						<img src="captcha.php" class="form-control" />
+					</div>
+					<?php if (!empty($ERROR_CAPTCHA)) : ?>
+						<div class="col-xs-5">
+							<span class="validation-message"><?php echo htmlentities($ERROR_CAPTCHA, ENT_QUOTES, 'UTF-8'); ?></span>
+						</div>
+					<?php endif; ?>
+				</div>
+			</div>
+			<button id='registerButton' type="submit" class="btn btn-default pull-right">Register</button>
+		</form>
+		<button id='backToLoginButton' class="btn btn-default pull-left" onclick="location.href = 'signin.php'">Back to Sign in</button>
+	</div>
+</body>
