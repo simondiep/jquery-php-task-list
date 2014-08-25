@@ -53,6 +53,18 @@ $(function() {
 		return $('#autosaveCheckbox').is(':checked');
 	}
 	
+	var isShowSmallTasksEnabled = function(){
+		return $('#filterSmallCheckbox').is(':checked');
+	}
+	
+	var isShowMediumTasksEnabled = function(){
+		return $('#filterMediumCheckbox').is(':checked');
+	}
+	
+	var isShowLargeTasksEnabled = function(){
+		return $('#filterLargeCheckbox').is(':checked');
+	}
+	
 	/**
 	 * Only allow saving if there is a change
 	 */
@@ -222,7 +234,7 @@ $(function() {
 	 * @param taskComplexity - String
 	 * @return String
 	 */
-	var getTaskId = function(taskComplexity) {
+	var getTaskComplexityClass = function(taskComplexity) {
 		if(taskComplexity == 'S'){
 			return taskIds.small;
 		} else if(taskComplexity == 'M'){
@@ -273,7 +285,7 @@ $(function() {
 	 * @return HTML element
 	 */
     var generateElement = function(taskListItem){
-		return $("<li id=" + taskListItem.id + " data-role='list-divider' style='background-color: " + getColorOfState(taskListItem.state) + "'><div class='taskContainer'><div class='taskButtonBar'><span id='remove-button'></span><span id='complete-button'></span><span id='start-button'></span><span id='stop-button'></span><span id='completion-date'>"+formatDate(taskListItem.completionDate)+"</span><span id='start-date'>"+formatDate(taskListItem.startDate)+"</span><span id='creation-date'>"+formatDate(taskListItem.creationDate)+"</span></div><div class='taskLabelContainer'><span id='"+getTaskId(taskListItem.complexity) + "'></span><div id='label-"+ taskListItem.id +"' class='taskLabel'>" + taskListItem.taskName + "</div></div></div></li>");
+		return $("<li id=" + taskListItem.id + " data-role='list-divider' style='background-color: " + getColorOfState(taskListItem.state) + "'><div class='taskContainer'><div class='taskButtonBar'><span id='remove-button'></span><span id='complete-button'></span><span id='start-button'></span><span id='stop-button'></span><span id='completion-date'>"+formatDate(taskListItem.completionDate)+"</span><span id='start-date'>"+formatDate(taskListItem.startDate)+"</span><span id='creation-date'>"+formatDate(taskListItem.creationDate)+"</span></div><div class='taskLabelContainer'><span class='"+getTaskComplexityClass(taskListItem.complexity) + "'></span><div id='label-"+ taskListItem.id +"' class='taskLabel'>" + taskListItem.taskName + "</div></div></div></li>");
     };
 
 	/**
@@ -288,6 +300,17 @@ $(function() {
 			//display the completed task header
 			$('#completedTasksHeader').show();
 		}
+		
+		if(!isShowSmallTasksEnabled() && 'S'===taskListItem.complexity){
+			elem.hide();
+		}
+		if(!isShowMediumTasksEnabled() && 'M'===taskListItem.complexity){
+			elem.hide();
+		}
+		if(!isShowLargeTasksEnabled() && 'L'===taskListItem.complexity){
+			elem.hide();
+		}
+		
 		$(listName).append(updateTaskDisplayBasedOnState(elem, taskListItem.state));
 	}
 	
@@ -353,15 +376,15 @@ $(function() {
 
 		// callback handler that will be called on success
 		request.done(function (response, textStatus, jqXHR){
-			if(response) {
-				console.log('loadData json received ');
+			if($.isEmptyObject(response)) {
+				console.log('loadData no json received');
+			} else {
+				console.log('loadData json received ' + response);
 				var jsonResponse = JSON.parse(response);
 				setTaskList(JSON.parse(jsonResponse.task_list_string));
 				setTaskListOrder(JSON.parse(jsonResponse.task_order_string));
 				$('#undoButton').attr('disabled','disabled');
 				console.log('local storage loaded');
-			} else {
-				console.log('loadData no json received');
 			}
 			setDirty(false);
 		});
@@ -400,6 +423,17 @@ $(function() {
 		$('#statsStartedTaskCount').text(startedTaskCount);
 		$('#statsCompletedTaskCount').text(completedTaskCount);
 		$('#statsTotalTaskCount').text(newTaskCount+startedTaskCount+completedTaskCount);
+	}
+	
+	var initializeSortableLists = function() {
+		$( inProgressListName +',' + completedListName ).sortable({
+			cancel : 'span',
+			update: function(event, ui) {
+				setDirty(true);
+				setTaskList(getTaskList());//This is to keep the undo indexes in order
+				saveTaskListOrder(isAutosaveEnabled());
+			}
+		});
 	}
 	
 	/**
@@ -447,13 +481,7 @@ $(function() {
 	populateTaskList();
 	
 	/* Set up the sortable lists */
-	$( '#sortableTodo, #sortableCompleted' ).sortable({
-		cancel : 'span',
-		update: function(event, ui) {
-			setDirty(true);
-			setTaskList(getTaskList());//This is to keep the undo indexes in order
-			saveTaskListOrder(isAutosaveEnabled());
-    }});
+	initializeSortableLists();
 	
 	/* Hook up the buttons inside each task */
 	$('[id^=sortable]').on('click','li div div span', function () {
@@ -642,6 +670,7 @@ $(function() {
         callback: function(key, options) {
             console.log('key: '+key);
 			if('edit'===key){
+				$(inProgressListName +',' + completedListName).sortable('destroy');
 				// Change the label into an input field
 				var taskLabel = $(this).parent().find('.taskLabel');
 				var originalText = taskLabel.text();
@@ -666,12 +695,14 @@ $(function() {
 				//On focus lost
 				inputField.blur(function() {
 				  replaceInputAndSave();
+				  initializeSortableLists();
 				});
 				
 				inputField.keypress(function(e) {
 					if(e.which == 13) {
 						//On Enter key pressed
 						replaceInputAndSave();
+						initializeSortableLists();
 					}
 				});
 				inputField.keydown(function(e) {
@@ -679,6 +710,7 @@ $(function() {
 						//On Escape, restore text
 						taskLabel.find('.removableDiv').remove();
 						taskLabel.text(originalText);
+						initializeSortableLists();
 					}
 				});
 			}
@@ -694,4 +726,17 @@ $(function() {
             "quit": {name: "Quit", icon: "quit"}*/
         }
     });
+	
+	/* Hook up the Show Small Tasks button */
+	$("#filterSmallCheckbox").change(function() {
+		populateTaskList();
+	});
+	/* Hook up the Show Medium Tasks button */
+	$("#filterMediumCheckbox").change(function() {
+		populateTaskList();
+	});
+	/* Hook up the Show Large Tasks button */
+	$("#filterLargeCheckbox").change(function() {
+		populateTaskList();
+	});
 });

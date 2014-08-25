@@ -7,7 +7,7 @@
     if(empty($_SESSION['user'])) 
     { 
 		// if not logged in, return back empty
-        echo "";
+        die("");
     } 
      
     // Everything below this point in the file is secured by the login system 

@@ -50,23 +50,34 @@
 	});
 	</script>
 </head>
-<body class="lighted-night-background">
+<body class="navbar-body lighted-night-background">
+	<nav class="navbar navbar-fixed-top navbar-inverse" role="navigation">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				</button>
+			</div>
+
+			<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="navbar-collapse-1">
+		  <ul class="nav navbar-nav">
+			<li><button id='exportButton' class="btn btn-default navbar-btn">Export</button></li>
+			<li><span class="btn btn-default navbar-btn btn-file">Import<input type="file" id='importFileInput' accept=".txt"></span></li>
+			<li><button id='clearAllButton' class="btn btn-default navbar-btn">Clear All</button></li>
+			<li><button id='undoButton' class="btn btn-default navbar-btn" disabled='disabled'>Undo</button></li>
+			<li><button id='redoButton' class="btn btn-default navbar-btn" disabled='disabled'>Redo</button></li>
+		  </ul>
+		  <ul class="nav navbar-nav navbar-right container-fluid">
+			<li><img src="assets/loading.gif" id="loading-indicator" style="display:none" /></li>
+			<li><p class="navbar-text">Sign in for more options</p><button id='signInButton' type="submit" class="btn btn-default navbar-btn">Sign In</button></li>
+		  </ul>
+		</div><!-- /.container-fluid -->
+	</nav>
 	<header>
-		<nav class="navbar navbar-transparent navbar-fixed-top" role="navigation">
-			<div class="container-fluid">
-			  <ul class="nav navbar-nav">
-				<li><button id='exportButton' class="btn btn-default navbar-btn">Export</button></li>
-				<li><span class="btn btn-default navbar-btn btn-file">Import<input type="file" id='importFileInput' accept=".txt"></span></li>
-				<li><button id='clearAllButton' class="btn btn-default navbar-btn">Clear All</button></li>
-				<li><button id='undoButton' class="btn btn-default navbar-btn" disabled='disabled'>Undo</button></li>
-				<li><button id='redoButton' class="btn btn-default navbar-btn" disabled='disabled'>Redo</button></li>
-			  </ul>
-			  <ul class="nav navbar-nav navbar-right container-fluid">
-				<li><img src="assets/loading.gif" id="loading-indicator" style="display:none" /></li>
-				<li><p class="navbar-text">Sign in for more options</p><button id='signInButton' type="submit" class="btn btn-default navbar-btn">Sign In</button></li>
-			  </ul>
-			</div><!-- /.container-fluid -->
-		</nav>
 		<h1>Task List</h1>
 		<div class="text-center">Warning, all data is lost on page change.  Export your data!</div>
 	</header>
@@ -101,6 +112,12 @@
 			<div class="col-md-2 col-xs-3"><label>Started </label><div id="statsStartedTaskCount" class="task-count started-task-count"></div></div>
 			<div class="col-md-2 col-xs-3"><label>Completed </label><div id="statsCompletedTaskCount" class="task-count completed-task-count"></div></div>
 			<div class="col-md-2 col-xs-3"><label>Total </label><div id="statsTotalTaskCount" class="task-count new-task-count"></div></div>
+		</div>
+		<hr/>
+		<div class="row">
+			<div class="col-md-3 col-xs-4"><label><input id="filterSmallCheckbox" type="checkbox" checked> Show Small Tasks</label><div class="small-task"></div></div>
+			<div class="col-md-3 col-xs-4"><label><input id="filterMediumCheckbox" type="checkbox" checked> Show Medium Tasks</label><div class="medium-task"></div></div>
+			<div class="col-md-3 col-xs-4"><label><input id="filterLargeCheckbox" type="checkbox" checked> Show Large Tasks</label><div class="large-task"></div></div>
 		</div>
 	</div>
 </body>

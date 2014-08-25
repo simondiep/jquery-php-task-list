@@ -47,30 +47,53 @@
 				$('#loading-indicator').hide();
 			}
 		});
+		
+		//Determine color style based on background color
+		if($('body').hasClass('lighted-night-background') || $('body').hasClass('dark-gray-background')){
+			//Dark style
+			$('header').css('color','white');
+			$('nav').addClass('navbar-inverse');
+		} else {
+			//Light style
+			$('header').css('color','#333');
+			$('nav').addClass('navbar-default');
+		}
 	});
 	</script>
 </head>
-<body class="<?php echo htmlentities($_SESSION['user']['background_class'], ENT_QUOTES, 'UTF-8'); ?>">
+<body class="navbar-body <?php echo htmlentities($_SESSION['user']['background_class'], ENT_QUOTES, 'UTF-8'); ?>">
+	<nav class="navbar navbar-fixed-top" role="navigation">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				</button>
+			</div>
+
+				<!-- Collect the nav links, forms, and other content for toggling -->
+			<div class="collapse navbar-collapse" id="navbar-collapse-1">
+				<ul class="nav navbar-nav">
+					<li><label class="navbar-text"><input id="autosaveCheckbox" type="checkbox"> Auto-save</label></li>
+					<li><button id='saveButton' class="btn btn-default navbar-btn">Save Now</button></li>
+					<li><button id='exportButton' class="btn btn-default navbar-btn">Export</button></li>
+					<li><span class="btn btn-default navbar-btn btn-file">Import<input type="file" id='importFileInput' accept=".txt"></span></li>
+					<li><button id='clearAllButton' class="btn btn-default navbar-btn">Clear All</button></li>
+					<li><button id='undoButton' class="btn btn-default navbar-btn" disabled='disabled'>Undo</button></li>
+					<li><button id='redoButton' class="btn btn-default navbar-btn" disabled='disabled'>Redo</button></li>
+				</ul>
+					<ul class="nav navbar-nav navbar-right container-fluid">
+					<li><img src="assets/loading.gif" id="loading-indicator" style="display:none" /></li>
+					<li><p class="navbar-text">Signed in as <b><?php echo htmlentities($_SESSION['user']['username'], ENT_QUOTES, 'UTF-8'); ?></b></p></li>
+					<li><button id='editAccountButton' class="btn btn-default navbar-btn" onclick="location.href = 'edit-account.php'">Edit Account</button></li>
+					<li><button id='signOutButton' class="btn btn-default navbar-btn" onclick="location.href = 'signout.php'">Sign Out</button></li>
+				</ul>
+			</div><!-- /.navbar-collapse -->
+		</div><!-- /.container-fluid -->
+	</nav>
 	<header>
-		<nav class="navbar navbar-transparent navbar-fixed-top" role="navigation">
-			<div class="container-fluid">
-			  <ul class="nav navbar-nav">
-				<li><p class="navbar-text"><input id="autosaveCheckbox" type="checkbox"> Auto-save</p></li>
-				<li><button id='saveButton' class="btn btn-default navbar-btn">Save Now</button></li>
-				<li><button id='exportButton' class="btn btn-default navbar-btn">Export</button></li>
-				<li><span class="btn btn-default navbar-btn btn-file">Import<input type="file" id='importFileInput' accept=".txt"></span></li>
-				<li><button id='clearAllButton' class="btn btn-default navbar-btn">Clear All</button></li>
-				<li><button id='undoButton' class="btn btn-default navbar-btn" disabled='disabled'>Undo</button></li>
-				<li><button id='redoButton' class="btn btn-default navbar-btn" disabled='disabled'>Redo</button></li>
-			  </ul>
-			  <ul class="nav navbar-nav navbar-right container-fluid">
-				<li><img src="assets/loading.gif" id="loading-indicator" style="display:none" /></li>
-				<li><p class="navbar-text">Signed in as <b><?php echo htmlentities($_SESSION['user']['username'], ENT_QUOTES, 'UTF-8'); ?></b></p></li>
-				<li><button id='editAccountButton' class="btn btn-default navbar-btn" onclick="location.href = 'edit-account.php'">Edit Account</button></li>
-				<li><button id='signOutButton' class="btn btn-default navbar-btn" onclick="location.href = 'signout.php'">Sign Out</button></li>
-			  </ul>
-			</div><!-- /.container-fluid -->
-		</nav>
 		<h1>Task List</h1>
 	</header>
 	<div id='taskListContainer' class="container narrow">
@@ -104,6 +127,12 @@
 			<div class="col-md-2 col-xs-3"><label>Started </label><div id="statsStartedTaskCount" class="task-count started-task-count"></div></div>
 			<div class="col-md-2 col-xs-3"><label>Completed </label><div id="statsCompletedTaskCount" class="task-count completed-task-count"></div></div>
 			<div class="col-md-2 col-xs-3"><label>Total </label><div id="statsTotalTaskCount" class="task-count new-task-count"></div></div>
+		</div>
+		<hr/>
+		<div class="row">
+			<div class="col-md-3 col-xs-4"><label><input id="filterSmallCheckbox" type="checkbox" checked> Show Small Tasks</label><div class="small-task"></div></div>
+			<div class="col-md-3 col-xs-4"><label><input id="filterMediumCheckbox" type="checkbox" checked> Show Medium Tasks</label><div class="medium-task"></div></div>
+			<div class="col-md-3 col-xs-4"><label><input id="filterLargeCheckbox" type="checkbox" checked> Show Large Tasks</label><div class="large-task"></div></div>
 		</div>
 	</div>
 </body>

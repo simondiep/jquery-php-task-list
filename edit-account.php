@@ -169,10 +169,22 @@
 			var backgroundDropdown = document.getElementById('backgroundSelect');
 			var selectedBackground = backgroundDropdown.options[backgroundDropdown.selectedIndex].value;
 			document.body.className = selectedBackground;
+			determineStyles();
+		}
+		
+		function determineStyles() {
+			//Determine color style based on background color
+			if(document.body.classList.contains('lighted-night-background') || document.body.classList.contains('dark-gray-background')){
+				//Dark style
+				document.getElementsByTagName('header')[0].style.color = 'white';
+			} else {
+				//Light style
+				document.getElementsByTagName('header')[0].style.color = '#333';
+			}
 		}
 	</script>
 </head>
-<body class="<?php echo htmlentities($_SESSION['user']['background_class'], ENT_QUOTES, 'UTF-8'); ?>">
+<body class="<?php echo htmlentities($_SESSION['user']['background_class'], ENT_QUOTES, 'UTF-8'); ?>" onload="determineStyles()">
 <header> 
 	<h1>Edit Account</h1>
 </header>

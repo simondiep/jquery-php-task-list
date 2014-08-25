@@ -137,6 +137,9 @@
 			</div>
 			<button id='saveButton' type="submit" class="btn btn-default pull-right">Sign In</button>
 		</form>
-		<button id='registerButton' class="btn btn-default pull-left" onclick="location.href = 'register.php'">Register</button>
+		<div class='btn-toolbar'>
+			<button id='registerButton' class="btn btn-default pull-left" onclick="location.href = 'register.php'">Register</button>
+			<button id='skipSigninButton' class="btn btn-default" onclick="location.href = 'index.php'">Skip Sign in</button>
+		</div>
 	</div>
 </body>

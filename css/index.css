@@ -4,6 +4,10 @@ header, section {
 	color: #fff;
 }
 
+.navbar-body {
+	padding-top: 50px;
+}
+
 .lighted-night-background {
 	background-image:url('../assets/blurred_background.jpg');
 }
@@ -33,6 +37,10 @@ footer {
 	padding: 10px;
 	text-align: center;
 	font-weight: normal;
+}
+
+hr {
+	border-top:1px solid #585872;
 }
 
 .statistics-list{
@@ -176,7 +184,7 @@ li.sortable-placeholder {
 	margin-left: 5px;
 }
 
-#small-task, #medium-task, #large-task {
+.small-task, .medium-task, .large-task {
 	background-repeat:no-repeat;
 	width:20px; 
 	height:20px;
@@ -185,15 +193,15 @@ li.sortable-placeholder {
 	margin-right: 10px;
 }
 
-#small-task {
+.small-task {
 	background-image:url('../assets/smalltask.png');
 }
 
-#medium-task {
+.medium-task {
 	background-image:url('../assets/mediumtask.png');
 }
 
-#large-task {
+.large-task {
 	background-image:url('../assets/largetask.png');
 }
 .navbar-transparent  {
