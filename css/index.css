@@ -3,6 +3,16 @@ header, section {
 	display: block;
 	color: #fff;
 }
+.unselectable {
+	cursor:default;
+	-webkit-user-select: none; /* Chrome/Safari */        
+	-moz-user-select: none; /* Firefox */
+	-ms-user-select: none; /* IE10+ */
+
+	/* Rules below not implemented in browsers yet */
+	-o-user-select: none;
+	user-select: none;
+}
 
 .navbar-body {
 	padding-top: 50px;
@@ -43,18 +53,10 @@ hr {
 	border-top:1px solid #585872;
 }
 
-.statistics-list{
-	background: rgba(255,255,255,0.9);
-	border: 1px solid #CCC;
-	border-radius: 20px;
-	padding-top: 10px;
-	padding-bottom: 10px;
-	margin-bottom: 30px;
-}
-
 .task-count {
 	display: inline-block;
 	margin-left: 5px;
+	margin-right:10px;
 	border: 1px solid #ccc;
 	border-radius: 4px;
 	height: 20px;
@@ -253,4 +255,12 @@ li.sortable-placeholder {
 	height:20px;
 	width:100%;
 	z-index: 1;
+}
+
+.navmenu-fixed-left li{
+	padding-left: 10px;
+}
+.filter-side-button{
+	position:fixed;
+	border-radius:0 0 4px 0;
 }

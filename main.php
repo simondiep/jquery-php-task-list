@@ -26,17 +26,18 @@
 	<!--<link rel="stylesheet" href="css/jquery.mobile-1.4.2.min.css">-->
 	<link rel="stylesheet" href="css/jquery.contextMenu.css" />
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.css" media="screen" />
+	<link rel="stylesheet" href="css/jasny-bootstrap.css" />
 	<link rel="stylesheet" href="css/index.css" />
 	<link rel="icon" href="assets/favicon.ico" type="image/x-icon" />
 	<script src="js/jquery-2.1.0.min.js"></script>
 	<script src="js/jquery.ui.position.js"></script>
 	<script src="js/jquery.contextMenu.js"></script>
 	<script src="js/jquery.fileDownload.js"></script>
-	<!--<script src="js/jquery.mobile-1.4.2.min.js"></script>-->
 	<script src="js/jquery-ui-1.10.4.min.js"></script>
 	<script src="js/jquery-ui-touch-punch-0.2.3.js"></script>
 	<script src="js/task-list-base.js"></script>
 	<script src="js/bootstrap.min.js"></script>
+	<script src="js/jasny-bootstrap.js"></script>
 	<script type="text/javascript">
 	$(document).ready(function() {
 		$.ajaxSetup({
@@ -53,10 +54,12 @@
 			//Dark style
 			$('header').css('color','white');
 			$('nav').addClass('navbar-inverse');
+			$('.offcanvas label').css('color','white');
 		} else {
 			//Light style
 			$('header').css('color','#333');
 			$('nav').addClass('navbar-default');
+			$('.offcanvas label').css('color','#333');
 		}
 	});
 	</script>
@@ -86,16 +89,34 @@
 				</ul>
 					<ul class="nav navbar-nav navbar-right container-fluid">
 					<li><img src="assets/loading.gif" id="loading-indicator" style="display:none" /></li>
-					<li><p class="navbar-text">Signed in as <b><?php echo htmlentities($_SESSION['user']['username'], ENT_QUOTES, 'UTF-8'); ?></b></p></li>
+					<li><p class="navbar-text unselectable">Signed in as <b><?php echo htmlentities($_SESSION['user']['username'], ENT_QUOTES, 'UTF-8'); ?></b></p></li>
 					<li><button id='editAccountButton' class="btn btn-default navbar-btn" onclick="location.href = 'edit-account.php'">Edit Account</button></li>
 					<li><button id='signOutButton' class="btn btn-default navbar-btn" onclick="location.href = 'signout.php'">Sign Out</button></li>
 				</ul>
 			</div><!-- /.navbar-collapse -->
 		</div><!-- /.container-fluid -->
 	</nav>
-	<header>
+	<nav>
+		<button type="button" class="btn btn-default filter-side-button" data-toggle="offcanvas" data-target="#filter-nav-menu" data-canvas="body">Filter</button>
+	</nav>
+	<header class='unselectable'>
 		<h1>Task List</h1>
 	</header>
+	<nav id="filter-nav-menu" class="navmenu navmenu-fixed-left offcanvas" role="navigation">
+	  <label class="navmenu-brand">Filter</label>
+	  <ul class="nav navmenu-nav">
+		<li><label><input id="filterSmallCheckbox" type="checkbox" checked> Show Small Tasks</label><div class="small-task"></div></li>
+		<li><label><input id="filterMediumCheckbox" type="checkbox" checked> Show Medium Tasks</label><div class="medium-task"></div></li>
+		<li><label><input id="filterLargeCheckbox" type="checkbox" checked> Show Large Tasks</label><div class="large-task"></div></li>
+		<li><label><input id="filterThisWeekCheckbox" type="checkbox"> Only Show Activity For This Week (Created, Started, or Completed)</label></li>
+		<hr/>
+		<label class="navmenu-brand">Stats</label>
+		<li><div id="statsNewTaskCount" class="task-count new-task-count"></div><label>New</label></li>
+		<li><div id="statsStartedTaskCount" class="task-count started-task-count"></div><label>Started</label></li>
+		<li><div id="statsCompletedTaskCount" class="task-count completed-task-count"></div><label>Completed</label></li>
+		<li><div id="statsTotalTaskCount" class="task-count new-task-count"></div><label>Total</label></li>
+	  </ul>
+	</nav>
 	<div id='taskListContainer' class="container narrow">
 		<div id="addTask">
 			<form class="form-inline" role="form">
@@ -120,21 +141,6 @@
 		</div>
 		<ul id="sortableCompleted" class="sortable">
 		</ul>
-	</div>
-	<div class="container statistics-list">
-		<div class="row text-center">
-			<div class="col-md-2 col-xs-3"><label>New </label><div id="statsNewTaskCount" class="task-count new-task-count"></div></div>
-			<div class="col-md-2 col-xs-3"><label>Started </label><div id="statsStartedTaskCount" class="task-count started-task-count"></div></div>
-			<div class="col-md-2 col-xs-3"><label>Completed </label><div id="statsCompletedTaskCount" class="task-count completed-task-count"></div></div>
-			<div class="col-md-2 col-xs-3"><label>Total </label><div id="statsTotalTaskCount" class="task-count new-task-count"></div></div>
-		</div>
-		<hr/>
-		<div class="row">
-			<div class="col-md-3 col-xs-4"><label><input id="filterSmallCheckbox" type="checkbox" checked> Show Small Tasks</label><div class="small-task"></div></div>
-			<div class="col-md-3 col-xs-4"><label><input id="filterMediumCheckbox" type="checkbox" checked> Show Medium Tasks</label><div class="medium-task"></div></div>
-			<div class="col-md-3 col-xs-4"><label><input id="filterLargeCheckbox" type="checkbox" checked> Show Large Tasks</label><div class="large-task"></div></div>
-			<div class="col-md-3 col-xs-4"><label><input id="filterThisWeekCheckbox" type="checkbox"> Only Show Activity For This Week (Created, Started, or Completed)</label></div>
-		</div>
 	</div>
 </body>
 </html>
