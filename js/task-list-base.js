@@ -2,7 +2,11 @@ $(document).ready(function() {
 
 	// Keep the addTaskTextField scaled dependening on the window width
     function checkWidth() {
-		$('#addTaskTextField').width($('#taskListContainer').width() - 210);
+		if($(window).width() >= 768){
+			$('#addTaskTextField').width($('#taskListContainer').width() - 210);
+		} else {
+			$('#addTaskTextField').width($('#taskListContainer').width() - 46);
+		}
     }
     // Execute on load
     checkWidth();
@@ -63,6 +67,23 @@ $(function() {
 	
 	var isShowLargeTasksEnabled = function(){
 		return $('#filterLargeCheckbox').is(':checked');
+	}
+	
+	var isShowForThisWeekEnabled = function(){
+		return $('#filterThisWeekCheckbox').is(':checked');
+	}
+	
+	var getFirstDayOfThisWeek = function(){
+		var curr = new Date; // get current date
+		var first = curr.getDate() - curr.getDay(); // First day is the day of the month - the day of the week
+		return new Date(curr.setDate(first));
+	}
+	
+	var getLastDayOfThisWeek = function(){
+		var curr = new Date; // get current date
+		var first = curr.getDate() - curr.getDay(); // First day is the day of the month - the day of the week
+		var last = first + 6; // last day is the first day + 6
+		return new Date(curr.setDate(last));
 	}
 	
 	/**
@@ -310,6 +331,16 @@ $(function() {
 		if(!isShowLargeTasksEnabled() && 'L'===taskListItem.complexity){
 			elem.hide();
 		}
+		if(isShowForThisWeekEnabled()){
+			var firstDay = getFirstDayOfThisWeek();
+			var lastDay = getLastDayOfThisWeek();
+			var createdThisWeek = taskListItem.creationDate > firstDay && taskListItem.creationDate < lastDay;
+			var startedThisWeek = taskListItem.startDate > firstDay && taskListItem.startDate < lastDay;
+			var completedThisWeek = taskListItem.completionDate > firstDay && taskListItem.completionDate < lastDay;
+			if(!(createdThisWeek || startedThisWeek || completedThisWeek)){
+				elem.hide();
+			}
+		}
 		
 		$(listName).append(updateTaskDisplayBasedOnState(elem, taskListItem.state));
 	}
@@ -379,7 +410,7 @@ $(function() {
 			if($.isEmptyObject(response)) {
 				console.log('loadData no json received');
 			} else {
-				console.log('loadData json received ' + response);
+				console.log('loadData json received ');
 				var jsonResponse = JSON.parse(response);
 				setTaskList(JSON.parse(jsonResponse.task_list_string));
 				setTaskListOrder(JSON.parse(jsonResponse.task_order_string));
@@ -437,9 +468,19 @@ $(function() {
 	}
 	
 	/**
+	 * Clear all local storage items relating to this app
+	 */
+	var clearLocalStorage = function() {
+		localStorage.removeItem('taskList');
+		localStorage.removeItem('taskListIndex');
+		localStorage.removeItem('taskListOrder');
+		localStorage.removeItem('taskListOrderIndex');
+	}
+	
+	/**
 	 * Creates and downloads a file with content
 	 */
-	function downloadFile(filename, textContent) {
+	var downloadFile = function(filename, textContent) {
 		var pom = document.createElement('a');
 		pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(textContent));
 		pom.setAttribute('download', filename);
@@ -452,7 +493,7 @@ $(function() {
 	
 	var taskList;
 	console.log('Initialization');
-	localStorage.clear();
+	clearLocalStorage();
 	localStorage.setItem('taskListIndex',-1);
 	localStorage.setItem('taskListOrderIndex',-1);
 	loadData();
@@ -737,6 +778,10 @@ $(function() {
 	});
 	/* Hook up the Show Large Tasks button */
 	$("#filterLargeCheckbox").change(function() {
+		populateTaskList();
+	});
+	/* Hook up the Show For This Week button */
+	$("#filterThisWeekCheckbox").change(function() {
 		populateTaskList();
 	});
 });

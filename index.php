@@ -118,6 +118,7 @@
 			<div class="col-md-3 col-xs-4"><label><input id="filterSmallCheckbox" type="checkbox" checked> Show Small Tasks</label><div class="small-task"></div></div>
 			<div class="col-md-3 col-xs-4"><label><input id="filterMediumCheckbox" type="checkbox" checked> Show Medium Tasks</label><div class="medium-task"></div></div>
 			<div class="col-md-3 col-xs-4"><label><input id="filterLargeCheckbox" type="checkbox" checked> Show Large Tasks</label><div class="large-task"></div></div>
+			<div class="col-md-3 col-xs-4"><label><input id="filterThisWeekCheckbox" type="checkbox"> Only Show Activity For This Week (Created, Started, or Completed)</label></div>
 		</div>
 	</div>
 </body>
