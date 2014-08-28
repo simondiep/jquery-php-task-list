@@ -50,7 +50,7 @@
 		});
 		
 		//Determine color style based on background color
-		if($('body').hasClass('lighted-night-background') || $('body').hasClass('dark-gray-background')){
+		if($('body').hasClass('lighted-night-background') || $('body').hasClass('carbon-fiber-background') || $('body').hasClass('dark-gray-background')){
 			//Dark style
 			$('header').css('color','white');
 			$('nav').addClass('navbar-inverse');

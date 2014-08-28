@@ -174,7 +174,7 @@
 		
 		function determineStyles() {
 			//Determine color style based on background color
-			if(document.body.classList.contains('lighted-night-background') || document.body.classList.contains('dark-gray-background')){
+			if(document.body.classList.contains('lighted-night-background') || document.body.classList.contains('carbon-fiber-background') || document.body.classList.contains('dark-gray-background')){
 				//Dark style
 				document.getElementsByTagName('header')[0].style.color = 'white';
 			} else {
@@ -213,6 +213,7 @@
 				<label for="backgroundSelect">Select a Background Style</label>
 				<select id="backgroundSelect" name="backgroundSelect" class="form-control" onchange="changeBackground()">
 					<option value="lighted-night-background" <?php if('lighted-night-background' == $_SESSION['user']['background_class']) echo 'selected="selected"';?>>Lighted Night</option>
+					<option value="carbon-fiber-background" <?php if('carbon-fiber-background' == $_SESSION['user']['background_class']) echo 'selected="selected"';?>>Carbon Fiber</option>
 					<option value="dark-gray-background" <?php if('dark-gray-background' == $_SESSION['user']['background_class']) echo 'selected="selected"';?>>Dark Gray</option>
 					<option value="light-gray-background" <?php if('light-gray-background' == $_SESSION['user']['background_class']) echo 'selected="selected"';?>>Light Gray</option>
 					<option value="peach-background" <?php if('peach-background' == $_SESSION['user']['background_class']) echo 'selected="selected"';?>>Peach</option>

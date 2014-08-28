@@ -39,9 +39,11 @@ $(function() {
 	var inProgressListName = '#sortableTodo';
 	var completedListName = '#sortableCompleted';
 	
-	var getTaskListUrl = "http://YOUR-HOST/task-list/get-task-list.php";
-	var saveTaskListUrl = "http://YOUR-HOST/task-list/save-task-list.php";
-	var saveTaskListOrderUrl = "http://YOUR-HOST/task-list/save-task-list-order.php";
+	var hostPrefix = "http://YOUR-HOST/task-list/";
+	
+	var getTaskListUrl = hostPrefix+"get-task-list.php";
+	var saveTaskListUrl = hostPrefix+"save-task-list.php";
+	var saveTaskListOrderUrl = hostPrefix+"save-task-list-order.php";
 	
 	/********************
 	 *     Functions    *
@@ -459,6 +461,7 @@ $(function() {
 	var initializeSortableLists = function() {
 		$( inProgressListName +',' + completedListName ).sortable({
 			cancel : 'span',
+			containment: '#taskListContainer',
 			update: function(event, ui) {
 				setDirty(true);
 				setTaskList(getTaskList());//This is to keep the undo indexes in order
@@ -705,12 +708,15 @@ $(function() {
 		}
 	});
 	
-	/* Connect the context menu to selectable rows */
+	/**
+	  * Connect the context menu to selectable rows
+	  * The names of each context item are keys for the listener to distinguish
+	  */ 
 	$.contextMenu({
         selector: '.taskContainer', 
         callback: function(key, options) {
             console.log('key: '+key);
-			if('edit'===key){
+			if('edit-name'===key){
 				$(inProgressListName +',' + completedListName).sortable('destroy');
 				// Change the label into an input field
 				var taskLabel = $(this).parent().find('.taskLabel');
@@ -754,10 +760,61 @@ $(function() {
 						initializeSortableLists();
 					}
 				});
+			} else if('change-to-small-task'==key){
+				//switch out icon
+				var span = $(this).parent().find('.taskLabelContainer span');
+				var newClass = 'small-task';
+				if(newClass != span.attr('class')){
+					span.removeClass();
+					span.addClass(newClass);
+					//save new state
+					setDirty(true);
+					var taskList = getTaskList();
+					taskList[span.parent().parent().parent().attr('id')].complexity = 'S';
+					saveTaskList(taskList,isAutosaveEnabled());
+					setTaskListOrder(getTaskListOrder());//This is to keep the undo indexes in order
+				}
+			} else if('change-to-medium-task'==key){
+				//switch out icon
+				var span = $(this).parent().find('.taskLabelContainer span');
+				var newClass = 'medium-task';
+				if(newClass != span.attr('class')){
+					span.removeClass();
+					span.addClass(newClass);
+					//save new state
+					setDirty(true);
+					var taskList = getTaskList();
+					taskList[span.parent().parent().parent().attr('id')].complexity = 'M';
+					saveTaskList(taskList,isAutosaveEnabled());
+					setTaskListOrder(getTaskListOrder());//This is to keep the undo indexes in order
+				}
+			} else if('change-to-large-task'==key){
+				//switch out icon
+				var span = $(this).parent().find('.taskLabelContainer span');
+				var newClass = 'large-task';
+				if(newClass != span.attr('class')){
+					span.removeClass();
+					span.addClass(newClass);
+					//save new state
+					setDirty(true);
+					var taskList = getTaskList();
+					taskList[span.parent().parent().parent().attr('id')].complexity = 'L';
+					saveTaskList(taskList,isAutosaveEnabled());
+					setTaskListOrder(getTaskListOrder());//This is to keep the undo indexes in order
+				}
 			}
         },
         items: {
-            "edit": {name: "Edit", icon: "edit"}
+            "edit-name": {name: "Edit Name", icon: "edit"},
+			"edit-complexity": {
+				name: "Complexity",
+				icon: "smalltask",
+				items: {
+					'change-to-small-task':{name: "Small", icon: "smalltask"},
+					'change-to-medium-task':{name: "Medium", icon: "mediumtask"},
+					'change-to-large-task':{name: "Large", icon: "largetask"}
+				}
+			}
 			/*,
             "cut": {name: "Cut", icon: "cut"},
             "copy": {name: "Copy", icon: "copy"},
