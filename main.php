@@ -27,6 +27,7 @@
 	<link rel="stylesheet" href="css/jquery.contextMenu.css" />
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.css" media="screen" />
 	<link rel="stylesheet" href="css/jasny-bootstrap.css" />
+	<link rel="stylesheet" href="css/bootstrap-datetimepicker.css" />
 	<link rel="stylesheet" href="css/index.css" />
 	<link rel="icon" href="assets/favicon.ico" type="image/x-icon" />
 	<script src="js/jquery-2.1.0.min.js"></script>
@@ -38,6 +39,7 @@
 	<script src="js/task-list-base.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/jasny-bootstrap.js"></script>
+	<script src="js/bootstrap-datetimepicker.js"></script>
 	<script type="text/javascript">
 	$(document).ready(function() {
 		$.ajaxSetup({
@@ -117,6 +119,7 @@
 		<li><div id="statsTotalTaskCount" class="task-count new-task-count"></div><label>Total</label></li>
 	  </ul>
 	</nav>
+	
 	<div id='taskListContainer' class="container narrow">
 		<div id="addTask">
 			<form class="form-inline" role="form">

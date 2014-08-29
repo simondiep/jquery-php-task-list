@@ -156,7 +156,7 @@ li.sortable-placeholder {
 	margin-right:55px;
 }
 
-#complete-button, #start-button , #stop-button, #remove-button {
+.complete-button, .start-button , .stop-button, .remove-button {
 	background-repeat:no-repeat;
 	padding:0px 4px; 
 	width:20px; 
@@ -166,23 +166,23 @@ li.sortable-placeholder {
 	cursor: pointer;
 }
 
-#complete-button {
+.complete-button {
 	background-image:url('../assets/complete_icon.png');
 }
 
-#start-button {
+.start-button {
 	background-image:url('../assets/play_icon.png');
 }
 
-#stop-button {
+.stop-button {
 	background-image:url('../assets/stop_icon.png');
 }
 
-#remove-button {
+.remove-button {
 	background-image:url('../assets/delete_icon.png');
 }
 
-#creation-date, #start-date, #completion-date {
+.due-date, .completion-date {
 	padding:1px 4px; 
 	background:#F6F6F6;
 	border:1px solid;
@@ -193,7 +193,7 @@ li.sortable-placeholder {
 	font-size: .8em;
 }
 
-#creation-date {
+.due-date{
 	margin-left: 5px;
 }
 

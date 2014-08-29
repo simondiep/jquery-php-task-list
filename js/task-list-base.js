@@ -27,15 +27,21 @@ $(function() {
 		completedstate: 'rgba(212,255,170,'+listItemTransparency+')',
 	};
 	
-	var taskIds = {
+	var taskComplexityClasses = {
 		small: 'small-task',
 		medium: 'medium-task',
 		large: 'large-task',
 	};
 	
+	var taskComplexityValues = {
+		small: 'S',
+		medium: 'M',
+		large: 'L',
+	}
+	
 	var dayOfWeekNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 	var monthNames = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
-
+	
 	var inProgressListName = '#sortableTodo';
 	var completedListName = '#sortableCompleted';
 	
@@ -258,12 +264,12 @@ $(function() {
 	 * @return String
 	 */
 	var getTaskComplexityClass = function(taskComplexity) {
-		if(taskComplexity == 'S'){
-			return taskIds.small;
-		} else if(taskComplexity == 'M'){
-			return taskIds.medium;
-		} else if(taskComplexity == 'L') {
-			return taskIds.large;
+		if(taskComplexityValues.small == taskComplexity){
+			return taskComplexityClasses.small;
+		} else if(taskComplexityValues.medium == taskComplexity){
+			return taskComplexityClasses.medium;
+		} else if(taskComplexityValues.large == taskComplexity) {
+			return taskComplexityClasses.large;
 		}
 		throw 'taskComplexity ' + taskComplexity + ' not handled.';
 	}
@@ -276,28 +282,25 @@ $(function() {
 	 */
 	var updateTaskDisplayBasedOnState = function(html, state){
 		
-		var taskButtonBarDiv = html.children('.taskContainer').children('.taskButtonBar');
+		var taskButtonBarDiv = html.find('.taskButtonBar');
 		if(state === 'new'){
-			taskButtonBarDiv.children('#start-button').show();
-			taskButtonBarDiv.children('#stop-button').hide();
-			taskButtonBarDiv.children('#complete-button').hide();
-			taskButtonBarDiv.children('#creation-date').show();
-			taskButtonBarDiv.children('#start-date').hide();
-			taskButtonBarDiv.children('#completion-date').hide();
+			taskButtonBarDiv.find('.start-button').show();
+			taskButtonBarDiv.find('.stop-button').hide();
+			taskButtonBarDiv.find('.complete-button').hide();
+			taskButtonBarDiv.find('.completion-date').hide();
+			taskButtonBarDiv.find('.due-date').show();
 		} else if(state === 'started'){
-			taskButtonBarDiv.children('#start-button').hide();
-			taskButtonBarDiv.children('#stop-button').show();
-			taskButtonBarDiv.children('#complete-button').show();
-			taskButtonBarDiv.children('#creation-date').hide();
-			taskButtonBarDiv.children('#start-date').show();
-			taskButtonBarDiv.children('#completion-date').hide();
+			taskButtonBarDiv.find('.start-button').hide();
+			taskButtonBarDiv.find('.stop-button').show();
+			taskButtonBarDiv.find('.complete-button').show();
+			taskButtonBarDiv.find('.completion-date').hide();
+			taskButtonBarDiv.find('.due-date').show();
 		} else if(state === 'completed') {
-			taskButtonBarDiv.children('#start-button').hide();
-			taskButtonBarDiv.children('#stop-button').hide();
-			taskButtonBarDiv.children('#complete-button').hide();
-			taskButtonBarDiv.children('#creation-date').hide();
-			taskButtonBarDiv.children('#start-date').hide();
-			taskButtonBarDiv.children('#completion-date').show();
+			taskButtonBarDiv.find('.start-button').hide();
+			taskButtonBarDiv.find('.stop-button').hide();
+			taskButtonBarDiv.find('.complete-button').hide();
+			taskButtonBarDiv.find('.due-date').hide();
+			taskButtonBarDiv.find('.completion-date').show();
 		}
 		return html;
 	}
@@ -308,7 +311,11 @@ $(function() {
 	 * @return HTML element
 	 */
     var generateElement = function(taskListItem){
-		return $("<li id=" + taskListItem.id + " data-role='list-divider' style='background-color: " + getColorOfState(taskListItem.state) + "'><div class='taskContainer'><div class='taskButtonBar'><span id='remove-button'></span><span id='complete-button'></span><span id='start-button'></span><span id='stop-button'></span><span id='completion-date'>"+formatDate(taskListItem.completionDate)+"</span><span id='start-date'>"+formatDate(taskListItem.startDate)+"</span><span id='creation-date'>"+formatDate(taskListItem.creationDate)+"</span></div><div class='taskLabelContainer'><span class='"+getTaskComplexityClass(taskListItem.complexity) + "'></span><div id='label-"+ taskListItem.id +"' class='taskLabel'>" + taskListItem.taskName + "</div></div></div></li>");
+		var dueDateString = "date not set";
+		if(taskListItem.dueDate) {
+			dueDateString = formatDate(taskListItem.dueDate);
+		}
+		return $("<li id=" + taskListItem.id + " data-role='list-divider' style='background-color: " + getColorOfState(taskListItem.state) + "'><div class='taskContainer'><div class='taskButtonBar'><span class='remove-button'></span><span class='complete-button'></span><span class='start-button'></span><span class='stop-button'></span><span class='completion-date'>"+formatDate(taskListItem.completionDate)+"</span><a class='due-date'>Due "+dueDateString+"</a></div><div class='taskLabelContainer'><span class='"+getTaskComplexityClass(taskListItem.complexity) + "'></span><div id='label-"+ taskListItem.id +"' class='taskLabel'>" + taskListItem.taskName + "</div></div></div></li>");
     };
 
 	/**
@@ -317,6 +324,21 @@ $(function() {
 	 */
 	var addTaskToDisplay = function(taskListItem){
 		var elem = generateElement(taskListItem);
+		
+		// Attach datetime widget to the due date label
+		var dueDateElement = elem.find('.due-date');
+		dueDateElement.datetimepicker({format: 'M d yyyy h:ii', bootcssVer:3, autoclose:true}).on('changeDate', function(ev){
+			var gmtTimestamp = ev.date.valueOf();
+			var localTimestamp = gmtTimestamp + (new Date(gmtTimestamp).getTimezoneOffset() * 60000);//Converting minutes to millis
+			dueDateElement.text('Due ' + formatDate(localTimestamp));
+
+			setDirty(true);
+			var taskList = getTaskList();
+			taskList[taskListItem.id].dueDate = localTimestamp;
+			saveTaskList(taskList,isAutosaveEnabled());
+			setTaskListOrder(getTaskListOrder());//This is to keep the undo indexes in order
+		});
+		
 		var listName = inProgressListName;
 		if(taskListItem.state === 'completed') {
 			listName = completedListName;
@@ -324,13 +346,13 @@ $(function() {
 			$('#completedTasksHeader').show();
 		}
 		
-		if(!isShowSmallTasksEnabled() && 'S'===taskListItem.complexity){
+		if(!isShowSmallTasksEnabled() && taskComplexityValues.small === taskListItem.complexity){
 			elem.hide();
 		}
-		if(!isShowMediumTasksEnabled() && 'M'===taskListItem.complexity){
+		if(!isShowMediumTasksEnabled() && taskComplexityValues.medium === taskListItem.complexity){
 			elem.hide();
 		}
-		if(!isShowLargeTasksEnabled() && 'L'===taskListItem.complexity){
+		if(!isShowLargeTasksEnabled() && taskComplexityValues.large === taskListItem.complexity){
 			elem.hide();
 		}
 		if(isShowForThisWeekEnabled()){
@@ -371,7 +393,9 @@ $(function() {
 			var month = unformattedDate.getMonth();
 			var date = unformattedDate.getDate();
 			var day = unformattedDate.getDay();
-			var formattedDate = dayOfWeekNames[day] + ' ' + monthNames[month] + ' ' + getDateOrdinalSuffix(date);
+			var hour = unformattedDate.getHours();
+			var minute = unformattedDate.getMinutes();
+			var formattedDate = dayOfWeekNames[day] + ' ' + monthNames[month] + ' ' + getDateOrdinalSuffix(date) +' '+ hour + ':' + minute;
 			return formattedDate;
 		}
 	}
@@ -531,9 +555,9 @@ $(function() {
 	$('[id^=sortable]').on('click','li div div span', function () {
 		var parentContainer = $(this).parent().parent().parent();
 		var taskId = parentContainer.attr('id');
-
-		if('complete-button' == this.id){
-			parentContainer.css({'background-color': colors.completedstate});
+		var buttonClicked = $(this).attr('class');
+		console.log('button clicked ' + buttonClicked);
+		if('complete-button' == buttonClicked){
 			taskList[taskId].state = 'completed';
 			taskList[taskId].completionDate = new Date().getTime();
 
@@ -542,20 +566,22 @@ $(function() {
 			addTaskToDisplay(taskList[taskId]);
 			//Scroll to the bottom
 			//$('html, body').animate({ scrollTop: $(document).height() }, 'slow');
-		} else if('start-button' == this.id){
+		} else if('start-button' == buttonClicked){
 			parentContainer.css({'background-color': colors.startedstate}); 
 			taskList[taskId].state = 'started';
 			taskList[taskId].startDate = new Date().getTime();
 			//Get span and update startDate
-			$(this).parent().children('#start-date').text(formatDate(taskList[taskId].startDate));
+			//$(this).parent().children('.start-date').text('Started '+formatDate(taskList[taskId].startDate));
 			updateTaskDisplayBasedOnState(parentContainer,taskList[taskId].state);
-		} else if('stop-button' == this.id){
+		} else if('stop-button' == buttonClicked){
 			parentContainer.css({'background-color': colors.newstate});
 			taskList[taskId].state = 'new';
 			updateTaskDisplayBasedOnState(parentContainer,taskList[taskId].state);
-		} else if('remove-button' == this.id){
+		} else if('remove-button' == buttonClicked){
 			parentContainer.remove();
 			delete taskList[taskId];
+		} else {
+			return;
 		}
 		setDirty(true);
 		saveAll(taskList,isAutosaveEnabled());
@@ -583,6 +609,7 @@ $(function() {
 			taskName: taskName,
 			complexity: complexity,
 			creationDate: creationDate,
+			dueDate: '',
 			startDate: '',
 			completionDate: '',
 			state: 'new'
@@ -763,42 +790,42 @@ $(function() {
 			} else if('change-to-small-task'==key){
 				//switch out icon
 				var span = $(this).parent().find('.taskLabelContainer span');
-				var newClass = 'small-task';
+				var newClass = taskComplexityClasses.small;
 				if(newClass != span.attr('class')){
 					span.removeClass();
 					span.addClass(newClass);
 					//save new state
 					setDirty(true);
 					var taskList = getTaskList();
-					taskList[span.parent().parent().parent().attr('id')].complexity = 'S';
+					taskList[span.parent().parent().parent().attr('id')].complexity = taskComplexityValues.small;
 					saveTaskList(taskList,isAutosaveEnabled());
 					setTaskListOrder(getTaskListOrder());//This is to keep the undo indexes in order
 				}
 			} else if('change-to-medium-task'==key){
 				//switch out icon
 				var span = $(this).parent().find('.taskLabelContainer span');
-				var newClass = 'medium-task';
+				var newClass = taskComplexityClasses.medium;
 				if(newClass != span.attr('class')){
 					span.removeClass();
 					span.addClass(newClass);
 					//save new state
 					setDirty(true);
 					var taskList = getTaskList();
-					taskList[span.parent().parent().parent().attr('id')].complexity = 'M';
+					taskList[span.parent().parent().parent().attr('id')].complexity = taskComplexityValues.medium;
 					saveTaskList(taskList,isAutosaveEnabled());
 					setTaskListOrder(getTaskListOrder());//This is to keep the undo indexes in order
 				}
 			} else if('change-to-large-task'==key){
 				//switch out icon
 				var span = $(this).parent().find('.taskLabelContainer span');
-				var newClass = 'large-task';
+				var newClass = taskComplexityClasses.large;
 				if(newClass != span.attr('class')){
 					span.removeClass();
 					span.addClass(newClass);
 					//save new state
 					setDirty(true);
 					var taskList = getTaskList();
-					taskList[span.parent().parent().parent().attr('id')].complexity = 'L';
+					taskList[span.parent().parent().parent().attr('id')].complexity = taskComplexityValues.large;
 					saveTaskList(taskList,isAutosaveEnabled());
 					setTaskListOrder(getTaskListOrder());//This is to keep the undo indexes in order
 				}
@@ -814,8 +841,9 @@ $(function() {
 					'change-to-medium-task':{name: "Medium", icon: "mediumtask"},
 					'change-to-large-task':{name: "Large", icon: "largetask"}
 				}
-			}
+			},
 			/*,
+			"set-due-date": {name: "Set Due Date"},
             "cut": {name: "Cut", icon: "cut"},
             "copy": {name: "Copy", icon: "copy"},
             "paste": {name: "Paste", icon: "paste"},
