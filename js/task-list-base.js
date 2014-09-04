@@ -340,7 +340,7 @@ $(function() {
 		var startedThisWeek = taskListItem.startDate > firstDay && taskListItem.startDate < lastDay;
 		var completedThisWeek = taskListItem.completionDate > firstDay && taskListItem.completionDate < lastDay;
 		var dueThisWeek = taskListItem.dueDate > firstDay && taskListItem.dueDate < lastDay;
-		reteurn (createdThisWeek || startedThisWeek || completedThisWeek || dueThisWeek);
+		return (createdThisWeek || startedThisWeek || completedThisWeek || dueThisWeek);
 	}
 	
 	/**
@@ -479,7 +479,6 @@ $(function() {
 		if(taskList){
 			// Check against filters
 			$.each(taskList, function( id, task ) {
-				console.log(task.complexity);
 				var passedFilter = false;
 				if(isShowSmallTasksEnabled() && taskComplexityValues.small === task.complexity){
 					passedFilter = true;
