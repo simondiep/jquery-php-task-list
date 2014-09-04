@@ -35,6 +35,7 @@
 	<script src="js/task-list-base.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/jasny-bootstrap.js"></script>
+	<script src="js/moment.js"></script>
 	<script src="js/bootstrap-datetimepicker.js"></script>
 	<script type="text/javascript">
 	$(document).ready(function() {
@@ -96,7 +97,7 @@
 		<li><label><input id="filterSmallCheckbox" type="checkbox" checked> Show Small Tasks</label><div class="small-task"></div></li>
 		<li><label><input id="filterMediumCheckbox" type="checkbox" checked> Show Medium Tasks</label><div class="medium-task"></div></li>
 		<li><label><input id="filterLargeCheckbox" type="checkbox" checked> Show Large Tasks</label><div class="large-task"></div></li>
-		<li><label><input id="filterThisWeekCheckbox" type="checkbox"> Only Show Activity For This Week (Created, Started, or Completed)</label></li>
+		<li><label><input id="filterThisWeekCheckbox" type="checkbox"> Only Show Activity For This Week</label></li>
 		<hr/>
 		<label class="navmenu-brand">Stats</label>
 		<li><div id="statsNewTaskCount" class="task-count new-task-count"></div><label>New</label></li>

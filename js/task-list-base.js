@@ -54,12 +54,12 @@ $(function() {
 	/********************
 	 *     Functions    *
 	 ********************/
-	//console.logCopy = console.log.bind(console);
-	//console.log = function(data)
-	//{
-	//	var timestamp = '[' + Date.now() + '] ';
-	//	this.logCopy(timestamp, data);
-	//};
+	/*console.logCopy = console.log.bind(console);
+	console.log = function(data)
+	{
+		var timestamp = '[' + Date.now() + '] ';
+		this.logCopy(timestamp, data);
+	};*/
 	
 	var isAutosaveEnabled = function(){
 		return $('#autosaveCheckbox').is(':checked');
@@ -311,13 +311,38 @@ $(function() {
 	 * @return HTML element
 	 */
     var generateElement = function(taskListItem){
-		var dueDateString = "date not set";
+		var dueDateString = "Due date not set";
 		if(taskListItem.dueDate) {
-			dueDateString = formatDate(taskListItem.dueDate);
+			dueDateString = 'Due ' + moment(formatDate(taskListItem.dueDate), 'dddd MMMM Do, YYYY H:mm').fromNow();
 		}
-		return $("<li id=" + taskListItem.id + " data-role='list-divider' style='background-color: " + getColorOfState(taskListItem.state) + "'><div class='taskContainer'><div class='taskButtonBar'><span class='remove-button'></span><span class='complete-button'></span><span class='start-button'></span><span class='stop-button'></span><span class='completion-date'>"+formatDate(taskListItem.completionDate)+"</span><a class='due-date'>Due "+dueDateString+"</a></div><div class='taskLabelContainer'><span class='"+getTaskComplexityClass(taskListItem.complexity) + "'></span><div id='label-"+ taskListItem.id +"' class='taskLabel'>" + taskListItem.taskName + "</div></div></div></li>");
+		return $("<li id=" + taskListItem.id + " data-role='list-divider' style='background-color: " + getColorOfState(taskListItem.state) + "'><div class='taskContainer'><div class='taskButtonBar'><span class='remove-button'></span><span class='complete-button'></span><span class='start-button'></span><span class='stop-button'></span><span class='completion-date'>"+formatDate(taskListItem.completionDate)+"</span><a class='due-date'>"+dueDateString+"</a></div><div class='taskLabelContainer'><span class='"+getTaskComplexityClass(taskListItem.complexity) + "'></span><div id='label-"+ taskListItem.id +"' class='taskLabel'>" + taskListItem.taskName + "</div></div></div></li>");
     };
 
+	var addDateSelectionHandler = function(dueDateElement,taskListItemId) {
+		dueDateElement.on('changeDate', function(ev){
+			var gmtTimestamp = ev.date.valueOf();
+			var localTimestamp = gmtTimestamp + (new Date(gmtTimestamp).getTimezoneOffset() * 60000);//Converting minutes to millis
+			//dueDateElement.text('Due ' + formatDate(localTimestamp));
+			dueDateElement.text('Due ' + moment(formatDate(localTimestamp), 'dddd MMMM Do, YYYY H:mm').fromNow());
+
+			setDirty(true);
+			var taskList = getTaskList();
+			taskList[taskListItemId].dueDate = localTimestamp;
+			saveTaskList(taskList,isAutosaveEnabled());
+			setTaskListOrder(getTaskListOrder());//This is to keep the undo indexes in order
+		});
+	}
+	
+	var isThisWeek = function(taskListItem){
+		var firstDay = getFirstDayOfThisWeek();
+		var lastDay = getLastDayOfThisWeek();
+		var createdThisWeek = taskListItem.creationDate > firstDay && taskListItem.creationDate < lastDay;
+		var startedThisWeek = taskListItem.startDate > firstDay && taskListItem.startDate < lastDay;
+		var completedThisWeek = taskListItem.completionDate > firstDay && taskListItem.completionDate < lastDay;
+		var dueThisWeek = taskListItem.dueDate > firstDay && taskListItem.dueDate < lastDay;
+		reteurn (createdThisWeek || startedThisWeek || completedThisWeek || dueThisWeek);
+	}
+	
 	/**
 	 * Adds a TaskListItem to the current page
 	 * @param taskListItem - TaskListItem
@@ -325,45 +350,34 @@ $(function() {
 	var addTaskToDisplay = function(taskListItem){
 		var elem = generateElement(taskListItem);
 		
-		// Attach datetime widget to the due date label
-		var dueDateElement = elem.find('.due-date');
-		dueDateElement.datetimepicker({format: 'M d yyyy h:ii', bootcssVer:3, autoclose:true}).on('changeDate', function(ev){
-			var gmtTimestamp = ev.date.valueOf();
-			var localTimestamp = gmtTimestamp + (new Date(gmtTimestamp).getTimezoneOffset() * 60000);//Converting minutes to millis
-			dueDateElement.text('Due ' + formatDate(localTimestamp));
-
-			setDirty(true);
-			var taskList = getTaskList();
-			taskList[taskListItem.id].dueDate = localTimestamp;
-			saveTaskList(taskList,isAutosaveEnabled());
-			setTaskListOrder(getTaskListOrder());//This is to keep the undo indexes in order
-		});
+		//Filters
+		if(!isShowSmallTasksEnabled() && taskComplexityValues.small === taskListItem.complexity){
+			elem.hide();
+		} else if(!isShowMediumTasksEnabled() && taskComplexityValues.medium === taskListItem.complexity){
+			elem.hide();
+		} else if(!isShowLargeTasksEnabled() && taskComplexityValues.large === taskListItem.complexity){
+			elem.hide();
+		} else if(isShowForThisWeekEnabled() && !isThisWeek(taskListItem)){
+			elem.hide();
+		}
 		
 		var listName = inProgressListName;
 		if(taskListItem.state === 'completed') {
 			listName = completedListName;
 			//display the completed task header
 			$('#completedTasksHeader').show();
-		}
-		
-		if(!isShowSmallTasksEnabled() && taskComplexityValues.small === taskListItem.complexity){
-			elem.hide();
-		}
-		if(!isShowMediumTasksEnabled() && taskComplexityValues.medium === taskListItem.complexity){
-			elem.hide();
-		}
-		if(!isShowLargeTasksEnabled() && taskComplexityValues.large === taskListItem.complexity){
-			elem.hide();
-		}
-		if(isShowForThisWeekEnabled()){
-			var firstDay = getFirstDayOfThisWeek();
-			var lastDay = getLastDayOfThisWeek();
-			var createdThisWeek = taskListItem.creationDate > firstDay && taskListItem.creationDate < lastDay;
-			var startedThisWeek = taskListItem.startDate > firstDay && taskListItem.startDate < lastDay;
-			var completedThisWeek = taskListItem.completionDate > firstDay && taskListItem.completionDate < lastDay;
-			if(!(createdThisWeek || startedThisWeek || completedThisWeek)){
-				elem.hide();
-			}
+		} else if(!(elem.css('display') == 'none')){
+			// Attach datetime widget to the due date label only on click, to reduce the massive amount of new divs added
+			var dueDateElement = elem.find('.due-date');
+			dueDateElement.click( function() {
+				if(!dueDateElement.hasClass('datePickerRegistered')){
+					dueDateElement.addClass('datePickerRegistered');
+					dueDateElement.datetimepicker({format: 'M d yyyy h:ii', bootcssVer:3, autoclose:true});
+					addDateSelectionHandler(dueDateElement,taskListItem.id);
+					dueDateElement.datetimepicker('show');
+				}
+			});
+			
 		}
 		
 		$(listName).append(updateTaskDisplayBasedOnState(elem, taskListItem.state));
@@ -390,12 +404,13 @@ $(function() {
 			return '';
 		} else {
 			var unformattedDate = new Date(timestamp);
+			var day = unformattedDate.getDay();
 			var month = unformattedDate.getMonth();
 			var date = unformattedDate.getDate();
-			var day = unformattedDate.getDay();
+			var year = unformattedDate.getFullYear();
 			var hour = unformattedDate.getHours();
 			var minute = unformattedDate.getMinutes();
-			var formattedDate = dayOfWeekNames[day] + ' ' + monthNames[month] + ' ' + getDateOrdinalSuffix(date) +' '+ hour + ':' + minute;
+			var formattedDate = dayOfWeekNames[day] + ' ' + monthNames[month] + ' ' + getDateOrdinalSuffix(date) + ', ' + year +' '+ hour + ':' + minute;
 			return formattedDate;
 		}
 	}
@@ -462,17 +477,32 @@ $(function() {
 		var startedTaskCount = 0;
 		var completedTaskCount = 0;
 		if(taskList){
+			// Check against filters
 			$.each(taskList, function( id, task ) {
-				switch(task.state) {
-					case 'new':
-						newTaskCount++;
-						break;
-					case 'started':
-						startedTaskCount++;
-						break;
-					case 'completed':
-						completedTaskCount++;
-						break;
+				console.log(task.complexity);
+				var passedFilter = false;
+				if(isShowSmallTasksEnabled() && taskComplexityValues.small === task.complexity){
+					passedFilter = true;
+				} else if(isShowMediumTasksEnabled() && taskComplexityValues.medium === task.complexity){
+					passedFilter = true;
+				} else if(isShowLargeTasksEnabled() && taskComplexityValues.large === task.complexity){
+					passedFilter = true;
+				} else if(isShowForThisWeekEnabled() && isThisWeek(task)){
+					passedFilter = true;
+				}
+				
+				if(passedFilter) {
+					switch(task.state) {
+						case 'new':
+							newTaskCount++;
+							break;
+						case 'started':
+							startedTaskCount++;
+							break;
+						case 'completed':
+							completedTaskCount++;
+							break;
+					}
 				}
 			});
 		}
@@ -502,6 +532,12 @@ $(function() {
 		localStorage.removeItem('taskListIndex');
 		localStorage.removeItem('taskListOrder');
 		localStorage.removeItem('taskListOrderIndex');
+		
+		Object.keys(localStorage).forEach(function(key){
+		   if (/^(taskList-)|(taskListOrder-)/.test(key)) {
+			   localStorage.removeItem(key);
+		   }
+		});
 	}
 	
 	/**
@@ -514,20 +550,10 @@ $(function() {
 		pom.click();
 	}
 	
-	/********************
-	 *  Initialization  *
-	 ********************/
-	
-	var taskList;
-	console.log('Initialization');
-	clearLocalStorage();
-	localStorage.setItem('taskListIndex',-1);
-	localStorage.setItem('taskListOrderIndex',-1);
-	loadData();
-	updateStatistics();
 	/* Populate the task list from local storage */
 	var populateTaskList = function() {
-		taskList = getTaskList();
+		//console.log('populateTaskList start');
+		var taskList = getTaskList();
 		taskList = taskList || {};
 		//Clear existing lists
 		$(inProgressListName).empty();
@@ -544,8 +570,19 @@ $(function() {
 				}
 			}
 		}
+		//console.log('populateTaskList done');
+		updateStatistics();
 	}
 	
+	/********************
+	 *  Initialization  *
+	 ********************/
+	
+	console.log('Initialization');
+	clearLocalStorage();
+	localStorage.setItem('taskListIndex',-1);
+	localStorage.setItem('taskListOrderIndex',-1);
+	loadData();
 	populateTaskList();
 	
 	/* Set up the sortable lists */
@@ -556,6 +593,7 @@ $(function() {
 		var parentContainer = $(this).parent().parent().parent();
 		var taskId = parentContainer.attr('id');
 		var buttonClicked = $(this).attr('class');
+		var taskList = getTaskList();
 		console.log('button clicked ' + buttonClicked);
 		if('complete-button' == buttonClicked){
 			taskList[taskId].state = 'completed';
@@ -615,6 +653,7 @@ $(function() {
 			state: 'new'
 		};
 		
+		var taskList = getTaskList();
 		taskList[id] = tempTaskItem;
 		addTaskToDisplay(tempTaskItem);
 		setDirty(true);
@@ -697,7 +736,7 @@ $(function() {
 		e.preventDefault();
 		var previousTaskListIndex = parseInt(localStorage.getItem('taskListIndex')) - 1;
 		var previousTaskListOrderIndex = parseInt(localStorage.getItem('taskListOrderIndex')) - 1;
-		console.log('undo previousTaskListIndex:' + previousTaskListIndex + ', previousTaskListOrderIndex:'+previousTaskListOrderIndex);
+		//console.log('undo previousTaskListIndex:' + previousTaskListIndex + ', previousTaskListOrderIndex:'+previousTaskListOrderIndex);
 		if((previousTaskListIndex >=0) && (previousTaskListOrderIndex >=0)) {
 			localStorage.setItem('taskListIndex',previousTaskListIndex);
 			localStorage.setItem('taskListOrderIndex',previousTaskListOrderIndex);
@@ -718,7 +757,7 @@ $(function() {
 		e.preventDefault();
 		var nextTaskListIndex = parseInt(localStorage.getItem('taskListIndex')) + 1;
 		var nextTaskListOrderIndex = parseInt(localStorage.getItem('taskListOrderIndex')) + 1;
-		console.log('redo nextTaskListIndex:' + nextTaskListIndex + ', nextTaskListOrderIndex:'+nextTaskListOrderIndex);
+		//console.log('redo nextTaskListIndex:' + nextTaskListIndex + ', nextTaskListOrderIndex:'+nextTaskListOrderIndex);
 		if((nextTaskListIndex >=0) && (nextTaskListOrderIndex >=0) && localStorage.getItem('taskList-'+nextTaskListIndex) && localStorage.getItem('taskListOrder-'+nextTaskListOrderIndex)) {
 			localStorage.setItem('taskListIndex',nextTaskListIndex);
 			localStorage.setItem('taskListOrderIndex',nextTaskListOrderIndex);
