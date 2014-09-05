@@ -274,4 +274,24 @@ li.sortable-placeholder {
 .filter-side-button{
 	position:fixed;
 	border-radius:0 0 4px 0;
+	z-index: 3;
+}
+
+.indent-side{
+	margin-left: 270px;
+}
+
+.side-panel{
+	float: left;
+	width: 264px;
+	border-radius: 0 4px 4px 0;
+	padding-left: 15px;
+	padding-right: 15px;
+	border-width: 1px;
+	border-style: solid;
+}
+
+#complexityComboBox{
+	width:70px;
+	border-radius: 4px 0 0 4px;
 }

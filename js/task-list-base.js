@@ -1,11 +1,13 @@
 $(document).ready(function() {
 
-	// Keep the addTaskTextField scaled dependening on the window width
     function checkWidth() {
 		if($(window).width() >= 768){
-			$('#addTaskTextField').width($('#taskListContainer').width() - 210);
+			$('.side-panel').show();
+			$('#taskListContainer').addClass('indent-side');
 		} else {
-			$('#addTaskTextField').width($('#taskListContainer').width() - 46);
+			$('.side-panel').hide();
+			$('#taskListContainer').removeClass('indent-side');
+			//TODO Show categories in the left slide menu
 		}
     }
     // Execute on load
@@ -315,7 +317,7 @@ $(function() {
 		if(taskListItem.dueDate) {
 			dueDateString = 'Due ' + moment(formatDate(taskListItem.dueDate), 'dddd MMMM Do, YYYY H:mm').fromNow();
 		}
-		return $("<li id=" + taskListItem.id + " data-role='list-divider' style='background-color: " + getColorOfState(taskListItem.state) + "'><div class='taskContainer'><div class='taskButtonBar'><span class='remove-button'></span><span class='complete-button'></span><span class='start-button'></span><span class='stop-button'></span><span class='completion-date'>"+formatDate(taskListItem.completionDate)+"</span><a class='due-date'>"+dueDateString+"</a></div><div class='taskLabelContainer'><span class='"+getTaskComplexityClass(taskListItem.complexity) + "'></span><div id='label-"+ taskListItem.id +"' class='taskLabel'>" + taskListItem.taskName + "</div></div></div></li>");
+		return $("<li id=" + taskListItem.id + " data-role='list-divider' style='background-color: " + getColorOfState(taskListItem.state) + "'><div class='taskContainer'><div class='taskButtonBar'><span class='remove-button'></span><span class='complete-button'></span><span class='start-button'></span><span class='stop-button'></span><span class='completion-date'>"+formatDate(taskListItem.completionDate)+"</span><a class='due-date'>"+dueDateString+"</a></div><div class='taskLabelContainer' style='white-space:nowrap'><span class='"+getTaskComplexityClass(taskListItem.complexity) + "'></span><div id='label-"+ taskListItem.id +"' class='taskLabel'>" + taskListItem.taskName + "</div></div></div></li>");
     };
 
 	var addDateSelectionHandler = function(dueDateElement,taskListItemId) {
@@ -450,6 +452,7 @@ $(function() {
 		request.done(function (response, textStatus, jqXHR){
 			if($.isEmptyObject(response)) {
 				console.log('loadData no json received');
+				setTaskList({});
 			} else {
 				console.log('loadData json received ');
 				var jsonResponse = JSON.parse(response);
@@ -662,6 +665,7 @@ $(function() {
 		//}, 'slow');
 		saveAll(taskList,isAutosaveEnabled());
 		$('#addTaskTextField').val('');
+		$(this).prop('disabled',true);
 	});
 	
 	/* Hook up the Save button */
@@ -880,9 +884,7 @@ $(function() {
 					'change-to-large-task':{name: "Large", icon: "largetask"}
 				}
 			},
-			/*,
-			"set-due-date": {name: "Set Due Date"},
-            "cut": {name: "Cut", icon: "cut"},
+            /*"cut": {name: "Cut", icon: "cut"},
             "copy": {name: "Copy", icon: "copy"},
             "paste": {name: "Paste", icon: "paste"},
             "delete": {name: "Delete", icon: "delete"},
@@ -906,5 +908,57 @@ $(function() {
 	/* Hook up the Show For This Week button */
 	$("#filterThisWeekCheckbox").change(function() {
 		populateTaskList();
+	});
+	
+	/* Enable add new task button when a task name is entered */
+	$('#addTaskTextField').on('input', function() {
+		if(!$.trim(this.value).length) { // empty string
+			$('#addTaskButton').prop('disabled',true);
+		} else {
+			$('#addTaskButton').prop('disabled',false);
+		}
+	});
+	
+	/* Enable add new category button when a category name is entered */
+	$('#newCategoryTextField').on('input', function() {
+		if(!$.trim(this.value).length) { // empty string
+			$('#addNewCategoryButton').prop('disabled',true);
+		} else {
+			$('#addNewCategoryButton').prop('disabled',false);
+		}
+	});
+	
+	/* Hook up the Add Category button */
+	$('#addNewCategoryButton').click(function (e) {
+		e.preventDefault();
+		//TODO add x button to remove category
+		$('.category-list').append('<a class="unselectable list-group-item">'+ $('#newCategoryTextField').val() +'</a>');
+		/* Hook up category-list to set active when clicked */
+		// TODO only hook it up for new elements
+		$('.category-list a').click(function(e) {
+			$('.category-list a.active').removeClass('active');
+			var $this = $(this);
+			if (!$this.hasClass('active')) {
+				$this.addClass('active');
+			}
+			e.preventDefault();
+		});
+		
+		$('#newCategoryTextField').val('');
+		$(this).prop('disabled',true);
+		
+	});
+	
+	// TODO fetch categories from DB
+	$('.category-list').append('<a class="unselectable list-group-item active">All</a>');
+	$('.category-list').append('<a class="unselectable list-group-item">Unassigned</a>');
+	// TODO only hook it up for new elements
+	$('.category-list a').click(function(e) {
+		$('.category-list a.active').removeClass('active');
+		var $this = $(this);
+		if (!$this.hasClass('active')) {
+			$this.addClass('active');
+		}
+		e.preventDefault();
 	});
 });

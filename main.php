@@ -19,6 +19,7 @@
     // We can display the user's username to them by reading it from the session array.  Remember that because 
     // a username is user submitted content we must use htmlentities on it before displaying it to the user. 
 ?> 
+<html>
 <head>
 	<meta name="viewport" content="initial-scale=1.0">
 	<meta charset="utf-8">
@@ -57,11 +58,15 @@
 			//Dark style
 			$('header').css('color','white');
 			$('nav').addClass('navbar-inverse');
+			$('.side-panel').addClass('navbar-inverse');
+			$('.side-panel h4').css('color','white');
 			$('.offcanvas label').css('color','white');
 		} else {
 			//Light style
 			$('header').css('color','#333');
 			$('nav').addClass('navbar-default');
+			$('.side-panel').addClass('navbar-default');
+			$('.side-panel h4').css('color','#333');
 			$('.offcanvas label').css('color','#333');
 		}
 	});
@@ -100,7 +105,7 @@
 		</div><!-- /.container-fluid -->
 	</nav>
 	<nav>
-		<button type="button" class="btn btn-default filter-side-button" data-toggle="offcanvas" data-target="#filter-nav-menu" data-canvas="body">Filter</button>
+		<button type="button" class="btn btn-default filter-side-button" data-toggle="offcanvas" data-target="#filter-nav-menu" data-canvas="body">More</button>
 	</nav>
 	<header class='unselectable'>
 		<h1>Task List</h1>
@@ -120,22 +125,38 @@
 		<li><div id="statsTotalTaskCount" class="task-count new-task-count"></div><label>Total</label></li>
 	  </ul>
 	</nav>
-	
-	<div id='taskListContainer' class="container narrow">
+
+	<div class="side-panel">
+		<h4 class="text-center">Filter By Category</h4>
+		<form class="form-inline" role="form">
+			<div class="input-group">
+				<input type="text" class="form-control" id="newCategoryTextField" placeholder="Enter new Category"></input>
+				<label class="sr-only" for="newCategoryTextField">New Category</label>
+				<div class="input-group-btn">
+					<button id='addNewCategoryButton' type="submit" class="btn btn-default" disabled>Add</button>
+				</div>
+			</div>
+		</form>
+		<div class="list-group category-list">
+		</div>
+	</div>
+	<div id='taskListContainer' class="indent-side">
 		<div id="addTask">
 			<form class="form-inline" role="form">
-				<div class="form-group">
+				<div class="input-group">
+					<div class="input-group-btn">
+						<select id="complexityComboBox" class="form-control">
+							<option>S</option>
+							<option>M</option>
+							<option>L</option>
+						</select>
+					</div>
 					<label class="sr-only" for="addTaskTextField">Task Name</label>
 					<input type="text" class="form-control" id="addTaskTextField" placeholder="Enter task">
+					<div class="input-group-btn">
+						<button id='addTaskButton' type="submit" class="btn btn-default" disabled>Add Task</button>
+					</div>
 				</div>
-				<div class="form-group">
-					<select id="complexityComboBox" class="form-control">
-						<option>S</option>
-						<option>M</option>
-						<option>L</option>
-					</select>
-				</div>
-				<button id='addTaskButton' type="submit" class="btn btn-default">Add Task</button>
 			</form>
 		</div>
 		<ul id="sortableTodo" class="sortable"></ul>
