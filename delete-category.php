@@ -14,17 +14,14 @@
         die("Redirecting to signin.php"); 
     } 
 
-	$query = " 
-		INSERT INTO task_list_order (user_id,task_list_order) 
-		VALUES (:user_id,:task_list_order)
-		ON DUPLICATE KEY UPDATE task_list_order = VALUES(task_list_order)";
- 
+	$query = "DELETE FROM category WHERE user_id = :user_id AND name = :category_name";
+	
 	try 
 	{ 
 		// Execute the query 
 		$stmt = $db->prepare($query); 
+		$stmt->bindParam(':category_name', $_POST['category_name']);
 		$stmt->bindParam(':user_id', $_SESSION['user']['id']);
-		$stmt->bindParam(':task_list_order', $_POST['task_list_order']);
 		$result = $stmt->execute(); 
 	} 
 	catch(PDOException $ex) 

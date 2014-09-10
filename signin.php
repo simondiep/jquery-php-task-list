@@ -22,7 +22,7 @@
                 salt, 
                 email,
 				background_class
-            FROM users 
+            FROM user 
             WHERE 
                 username = :username 
         "; 
@@ -139,7 +139,6 @@
 		</form>
 		<div class='btn-toolbar'>
 			<button id='registerButton' class="btn btn-default pull-left" onclick="location.href = 'register.php'">Register</button>
-			<button id='skipSigninButton' class="btn btn-default" onclick="location.href = 'index.php'">Skip Sign in</button>
 		</div>
 	</div>
 </body>

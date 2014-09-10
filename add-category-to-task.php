@@ -13,18 +13,18 @@
         // people can view your members-only content without logging in. 
         die("Redirecting to signin.php"); 
     } 
-
-	$query = " 
-		INSERT INTO task_list_order (user_id,task_list_order) 
-		VALUES (:user_id,:task_list_order)
-		ON DUPLICATE KEY UPDATE task_list_order = VALUES(task_list_order)";
- 
+	
 	try 
 	{ 
-		// Execute the query 
-		$stmt = $db->prepare($query); 
+		$stmt = $db->prepare('SELECT id FROM category WHERE user_id = :user_id AND name = :category_name'); 
+		$stmt->bindParam(':category_name', $_POST['category_name']);
 		$stmt->bindParam(':user_id', $_SESSION['user']['id']);
-		$stmt->bindParam(':task_list_order', $_POST['task_list_order']);
+		$result = $stmt->execute(); 
+		$categoryId = $stmt->fetch(PDO::FETCH_COLUMN, 0); 
+	
+		$stmt = $db->prepare('INSERT INTO categorized_task (category_id, task_id) VALUES (:category_id, :task_id)'); 
+		$stmt->bindParam(':category_id', $categoryId);
+		$stmt->bindParam(':task_id', $_POST['task_id']);
 		$result = $stmt->execute(); 
 	} 
 	catch(PDOException $ex) 

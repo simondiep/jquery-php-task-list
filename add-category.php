@@ -14,18 +14,17 @@
         die("Redirecting to signin.php"); 
     } 
 
-	$query = " 
-		INSERT INTO task_list_order (user_id,task_list_order) 
-		VALUES (:user_id,:task_list_order)
-		ON DUPLICATE KEY UPDATE task_list_order = VALUES(task_list_order)";
- 
+	$query = "INSERT INTO category (user_id, name) 
+				VALUES (:user_id,:category_name)";
+	
 	try 
 	{ 
 		// Execute the query 
 		$stmt = $db->prepare($query); 
+		$stmt->bindParam(':category_name', $_POST['category_name']);
 		$stmt->bindParam(':user_id', $_SESSION['user']['id']);
-		$stmt->bindParam(':task_list_order', $_POST['task_list_order']);
 		$result = $stmt->execute(); 
+		echo $db->lastInsertId();
 	} 
 	catch(PDOException $ex) 
 	{ 

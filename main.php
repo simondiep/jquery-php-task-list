@@ -87,10 +87,10 @@
 				<!-- Collect the nav links, forms, and other content for toggling -->
 			<div class="collapse navbar-collapse" id="navbar-collapse-1">
 				<ul class="nav navbar-nav">
-					<li><label class="navbar-text"><input id="autosaveCheckbox" type="checkbox"> Auto-save</label></li>
-					<li><button id='saveButton' class="btn btn-default navbar-btn">Save Now</button></li>
-					<li><button id='exportButton' class="btn btn-default navbar-btn">Export</button></li>
-					<li><span class="btn btn-default navbar-btn btn-file">Import<input type="file" id='importFileInput' accept=".txt"></span></li>
+					<li style='display:none'><label class="navbar-text"><input id="autosaveCheckbox" type="checkbox" checked> Auto-save</label></li>
+					<li style='display:none'><button id='saveButton' class="btn btn-default navbar-btn">Save Now</button></li>
+					<li style='display:none'><button id='exportButton' class="btn btn-default navbar-btn">Export</button></li>
+					<li style='display:none'><span class="btn btn-default navbar-btn btn-file">Import<input type="file" id='importFileInput' accept=".txt"></span></li>
 					<li><button id='clearAllButton' class="btn btn-default navbar-btn">Clear All</button></li>
 					<li><button id='undoButton' class="btn btn-default navbar-btn" disabled='disabled'>Undo</button></li>
 					<li><button id='redoButton' class="btn btn-default navbar-btn" disabled='disabled'>Redo</button></li>
@@ -127,7 +127,7 @@
 	</nav>
 
 	<div class="side-panel">
-		<h4 class="text-center">Filter By Category</h4>
+		<h4 class="text-center">Add Category</h4>
 		<form class="form-inline" role="form">
 			<div class="input-group">
 				<input type="text" class="form-control" id="newCategoryTextField" placeholder="Enter new Category"></input>
@@ -137,7 +137,12 @@
 				</div>
 			</div>
 		</form>
+		<h4 class="text-center">Filter By Category</h4>
 		<div class="list-group category-list">
+		</div>
+		<div class="btn-group btn-group-justified">
+			<a id='renameCategoryButton' class="btn btn-default" disabled>Rename</a>
+			<a id='deleteCategoryButton' class="btn btn-default" disabled>Delete</a>
 		</div>
 	</div>
 	<div id='taskListContainer' class="indent-side">

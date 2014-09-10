@@ -44,7 +44,7 @@
 			// :username is a special token, we will substitute a real value in its place when 
 			// we execute the query. 
 			$query = " 
-				SELECT 1 FROM users 
+				SELECT 1 FROM user 
 				WHERE username = :username"; 
 			 
 			// This contains the definitions for any special tokens that we place in 
@@ -84,7 +84,7 @@
 			// Now we perform the same type of check for the email address, in order 
 			// to ensure that it is unique. 
 			$query = " 
-				SELECT 1 FROM users 
+				SELECT 1 FROM user
 				WHERE email = :email"; 
 			 
 			$query_params = array( 
@@ -112,7 +112,7 @@
 				// Again, we are using special tokens (technically called parameters) to 
 				// protect against SQL injection attacks. 
 				$query = " 
-					INSERT INTO users ( 
+					INSERT INTO user ( 
 						username, 
 						password, 
 						salt, 

@@ -34,7 +34,7 @@
             $query = " 
                 SELECT 
                     1 
-                FROM users 
+                FROM user 
                 WHERE 
                     email = :email 
             "; 
@@ -104,7 +104,7 @@
 			// construct the rest of it depending on whether or not the user is changing 
 			// their password. 
 			$query = " 
-				UPDATE users 
+				UPDATE user 
 				SET 
 					email = :email,
 					background_class = :background_class
