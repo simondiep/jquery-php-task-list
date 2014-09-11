@@ -6,7 +6,7 @@ SET FOREIGN_KEY_CHECKS=0;
 DROP TABLE IF EXISTS `categorized_task`;
 CREATE TABLE `categorized_task` (
   `category_id` int(11) NOT NULL,
-  `task_id` bigint(20) unsigned NOT NULL,
+  `task_id` bigint(20) NOT NULL,
   `last_updated` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`category_id`,`task_id`),
   UNIQUE KEY `task_id` (`task_id`,`category_id`),
@@ -26,14 +26,14 @@ CREATE TABLE `category` (
   PRIMARY KEY (`id`),
   KEY `user_id_fk` (`user_id`),
   CONSTRAINT `user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for `task`
 -- ----------------------------
 DROP TABLE IF EXISTS `task`;
 CREATE TABLE `task` (
-  `id` bigint(20) unsigned NOT NULL,
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `task_name` longtext NOT NULL,
   `complexity` longtext NOT NULL,
   `state` longtext NOT NULL,
@@ -43,7 +43,7 @@ CREATE TABLE `task` (
   `completion_date` bigint(20) unsigned DEFAULT NULL,
   `last_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for `task_list_order`
@@ -62,7 +62,7 @@ CREATE TABLE `task_list_order` (
 -- ----------------------------
 DROP TABLE IF EXISTS `task_ownership`;
 CREATE TABLE `task_ownership` (
-  `task_id` bigint(20) unsigned NOT NULL,
+  `task_id` bigint(20) NOT NULL,
   `user_id` int(11) NOT NULL,
   `last_updated` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`task_id`,`user_id`),
@@ -71,7 +71,6 @@ CREATE TABLE `task_ownership` (
   CONSTRAINT `task_id_fk_2` FOREIGN KEY (`task_id`) REFERENCES `task` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `user_id_fk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 
 -- ----------------------------
 -- Table structure for `user`
@@ -88,4 +87,4 @@ CREATE TABLE `user` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;

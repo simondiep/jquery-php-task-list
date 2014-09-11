@@ -58,6 +58,7 @@ $(function() {
 	var GET_TASK_LIST_URL = HOST_PREFIX+"get-task-list.php";
 	var SAVE_TASK_LIST_URL = HOST_PREFIX+"save-task-list.php";
 	var SAVE_TASK_LIST_ORDER_URL = HOST_PREFIX+"save-task-list-order.php";
+	var ADD_TASK_URL = HOST_PREFIX+"add-task.php";
 	var GET_CATEGORIES_URL = HOST_PREFIX+"get-categories.php";
 	var ADD_CATEGORY_URL = HOST_PREFIX+"add-category.php";
 	var DELETE_CATEGORY_URL = HOST_PREFIX+"delete-category.php";
@@ -171,10 +172,6 @@ $(function() {
 	 * Boolean Functions *
 	 *********************/
 	
-	var isAutosaveEnabled = function(){
-		return $('#autosaveCheckbox').is(':checked');
-	}
-	
 	var isShowSmallTasksEnabled = function(){
 		return $('#filterSmallCheckbox').is(':checked');
 	}
@@ -217,17 +214,6 @@ $(function() {
 	/********************
 	 * Setter Functions *
 	 ********************/
-	
-	/**
-	 * Only allow saving if there is a change
-	 */
-	var setDirty = function(isDirty){
-		if(isDirty){
-			$('#saveButton').removeAttr('disabled');
-		} else {
-			$('#saveButton').attr('disabled','disabled');
-		}
-	}
 	
 	/**
 	 * Updates the local storage taskList
@@ -278,16 +264,23 @@ $(function() {
 					setCategories(jsonResponse);
 					//$('#undoButton').attr('disabled','disabled');
 				}
-				//setDirty(false);
 				
+				var totalTaskCount = Object.keys(getTaskList()).length;
+				var unassignedTaskCount = 0;//TODO
 				$('.category-list').empty();
-				$('.category-list').append('<a class="unselectable list-group-item active">'+ALL_CATEGORIES_LABEL+'</a>');
-				$('.category-list').append('<a class="unselectable list-group-item">'+UNASSIGNED_CATEGORIES_LABEL+'</a>');
+				$('.category-list').append('<a class="unselectable list-group-item active"><span class="badge">'+totalTaskCount+'</span>'+ALL_CATEGORIES_LABEL+'</a>');
+				$('.category-list').append('<a class="unselectable list-group-item"><span class="badge">'+unassignedTaskCount+'</span>'+UNASSIGNED_CATEGORIES_LABEL+'</a>');
 				
 				$.each(getCategories(), function( id, category ) {
-					$('.category-list').append('<a class="unselectable list-group-item">'+category.name+'</a>');
+					var tasksForCategory = 0;//TODO
+					$('.category-list').append('<a class="unselectable list-group-item"><span class="badge">'+tasksForCategory+'</span>'+category.name+'</a>');
 				});
 				attachCategoryListButtons();
+				
+				loadCategorizedTasks();
+	
+				/* Set up the sortable lists */
+				initializeSortableLists();
 			})
 			.fail( function(xhr, textStatus, errorThrown) {
 				alert(xhr.responseText);
@@ -312,12 +305,7 @@ $(function() {
 					setTaskListOrder(JSON.parse(jsonResponse.task_list_order));
 					$('#undoButton').attr('disabled','disabled');
 				}
-				setDirty(false);
-				
-				loadCategorizedTasks();
-	
-				/* Set up the sortable lists */
-				initializeSortableLists();
+				loadCategories();
 			})
 			.fail( function(xhr, textStatus, errorThrown) {
 				alert(xhr.responseText);
@@ -331,9 +319,11 @@ $(function() {
 				if($.isEmptyObject(response)) {
 					console.log('no categorized tasks found');
 					localStorage.setItem('categorizedTasks','{}');
+					// TODO set unassigned task count
 				} else {
 					localStorage.setItem('categorizedTasks',response);
 				}
+				updateCategoriesCount();
 				populateTaskList();
 			}
 		);
@@ -452,24 +442,25 @@ $(function() {
 	 *  If calling this without saveTaskListOrder(), make sure 
 	 *  to call setTaskListOrder(getTaskListOrder()) to ensure the undo indices are matching
 	 */
-	var saveTaskList = function(taskList,saveToServer) {
-		if(saveToServer) {
-			saveTaskListToDatabase(taskList);
-		}
+	var saveTaskList = function(taskList,callback) {
 		setTaskList(taskList);
+		updateCategoriesCount();
+		saveTaskListToDatabase(taskList,callback);
 	}
 	
 	/**
 	 * Makes an AJAX POST to save the task list
 	 */
-	var saveTaskListToDatabase = function(taskList) {
+	var saveTaskListToDatabase = function(taskList,callback) {
 		console.log('saveTaskListToDatabase');
 
 		$.post(SAVE_TASK_LIST_URL,
 			{task_list:JSON.stringify(taskList)})
 			.done( function(response) {
 				console.log('saveTaskListToDatabase complete ' + response);
-				setDirty(false);
+				if(callback !== undefined){
+					callback();
+				}
 			})
 			.fail( function(xhr, textStatus, errorThrown) {
 				alert(xhr.responseText);
@@ -480,12 +471,10 @@ $(function() {
 	 *  If calling this without saveTaskList(), make sure 
 	 *  to call setTaskListOrder(getTaskList()) to ensure the undo indices are matching
 	 */
-	var saveTaskListOrder = function(saveToServer) {
+	var saveTaskListOrder = function() {
 		var taskListOrder = getCurrentTaskListOrder();
-		if(saveToServer) {
-			saveTaskListOrderToDatabase(taskListOrder);
-		}
 		setTaskListOrder(taskListOrder);
+		saveTaskListOrderToDatabase(taskListOrder);
 	}
 	
 	/**
@@ -496,22 +485,103 @@ $(function() {
 
 		$.post(SAVE_TASK_LIST_ORDER_URL,
 			{task_list_order:JSON.stringify(taskListOrder)})
+			.done( function(response) {})
+			.fail( function(xhr, textStatus, errorThrown) {
+				alert(xhr.responseText);
+			});
+	}
+	
+	var saveAll = function(taskList,callback) {
+		saveTaskList(taskList,callback);
+		saveTaskListOrder();
+	}
+	
+	/**
+	 * Saves a new task, and retrieves a server-generated id
+	 */
+	var addTaskItem = function(taskItem) {
+		$.post(ADD_TASK_URL,{task: JSON.stringify(taskItem)} )
 			.done( function(response) {
-				setDirty(false);
+				var taskId = parseInt(response);
+				if(!$.isNumeric(taskId)){
+					alert('Error occurred: ' + response);
+				}
+				console.log('addTaskItem id ' + taskId);
+				
+				taskItem.id = taskId;
+				// do everything else here
+				var taskList = getTaskList();
+				taskList[taskId] = taskItem;
+				setTaskList(taskList);
+				addTaskToDisplay(taskItem);
+				saveTaskListOrder();
+				
+				$('#addTaskTextField').val('');
+				$('#addTaskButton').prop('disabled',true);
+				
+				// Add it to the selected category
+				var selectedCategory = localStorage.getItem('selectedCategory');
+				if(selectedCategory && selectedCategory != ALL_CATEGORIES_LABEL && selectedCategory != UNASSIGNED_CATEGORIES_LABEL){
+					addCategoryToTask(selectedCategory, taskItem.id);
+				} else {
+					updateCategoriesCount();
+				}
 			})
 			.fail( function(xhr, textStatus, errorThrown) {
 				alert(xhr.responseText);
 			});
 	}
 	
-	var saveAll = function(taskList,saveToServer) {
-		saveTaskList(taskList,saveToServer);
-		saveTaskListOrder(saveToServer);
-	}
-	
 	/********************************
 	 * Task List Building Functions *
 	 ********************************/
+	
+	/**
+	 *  Count the number of tasks in each category and update the display
+	 */
+	var updateCategoriesCount = function(){
+		// TODO some categories display a higher count than what's real
+		console.log('updateCategoriesCount');
+		var categoryCountMap = {};
+		var tasksAssignedMap = {};
+		// Go through each category with a task and add up the counts
+		var categorizedTasks = JSON.parse(localStorage.getItem('categorizedTasks'));
+		$.each(categorizedTasks, function( index, element ) {
+			var count = 1;
+			if(categoryCountMap[element.name] !== undefined){
+				count = parseInt(categoryCountMap[element.name]) + 1;
+			}
+			categoryCountMap[element.name] = count;
+			
+			tasksAssignedMap[element.task_id] = true;
+		});
+		
+		for (var key in categoryCountMap) {
+			if (categoryCountMap.hasOwnProperty(key)) {
+				$(".category-list a:contains("+key+") span").text(categoryCountMap[key]);
+			}
+		}
+		
+		// Set the total task count
+		var totalTaskCount = Object.keys(getTaskList()).length;
+		$(".category-list a:contains("+ALL_CATEGORIES_LABEL+") span").text(totalTaskCount);
+		
+		// Set unassigned task count
+		$(".category-list a:contains("+UNASSIGNED_CATEGORIES_LABEL+") span").text(totalTaskCount-Object.keys(tasksAssignedMap).length);
+		
+		// zero out categories without a task		
+		$.each(getCategories(), function( id, category ) {
+			var i;
+			for (i = 0; i < categorizedTasks.length; ++i) {
+				// Don't add already selected categories from the list
+				if(categorizedTasks[i].name === category.name) {
+					return true; // continue to next category
+				}
+			}
+			$(".category-list a:contains("+category.name+") span").text(0);
+		});
+		
+	}
 	 
 	/**
 	 * Takes an HTML li element and shows/hides child elements based on state
@@ -554,7 +624,7 @@ $(function() {
 		if(taskListItem.due_date) {
 			due_dateString = 'Due ' + moment(formatDate(taskListItem.due_date), 'dddd MMMM Do, YYYY H:mm').fromNow();
 		}
-		return $("<li id=" + taskListItem.id + " data-role='list-divider' style='background-color: " + getColorOfState(taskListItem.state) + "'><div class='taskContainer'><div class='taskButtonBar'><span class='remove-button'></span><span class='complete-button'></span><span class='start-button'></span><span class='stop-button'></span><span class='completion-date'>"+formatDate(taskListItem.completion_date)+"</span><a class='due-date'>"+due_dateString+"</a></div><div class='taskLabelContainer' style='white-space:nowrap'><span class='"+getTaskComplexityClass(taskListItem.complexity) + "'></span><div id='label-"+ taskListItem.id +"' class='taskLabel'>" + taskListItem.task_name + "</div></div></div></li>");
+		return $("<li id=" + taskListItem.id + " data-role='list-divider' style='background-color: " + getColorOfState(taskListItem.state) + "' class='taskContainer'><div class='taskButtonBar'><span class='remove-button'></span><span class='complete-button'></span><span class='start-button'></span><span class='stop-button'></span><span class='completion-date'>"+formatDate(taskListItem.completion_date)+"</span><a class='due-date'>"+due_dateString+"</a></div><div class='taskLabelContainer' style='white-space:nowrap'><span class='"+getTaskComplexityClass(taskListItem.complexity) + "'></span><div id='label-"+ taskListItem.id +"' class='taskLabel'>" + taskListItem.task_name + "</div></div></li>");
     };
 
 	var addDateSelectionHandler = function(due_dateElement,taskListItemId) {
@@ -564,10 +634,9 @@ $(function() {
 			//due_dateElement.text('Due ' + formatDate(localTimestamp));
 			due_dateElement.text('Due ' + moment(formatDate(localTimestamp), 'dddd MMMM Do, YYYY H:mm').fromNow());
 
-			setDirty(true);
 			var taskList = getTaskList();
 			taskList[taskListItemId].due_date = localTimestamp;
-			saveTaskList(taskList,isAutosaveEnabled());
+			saveTaskList(taskList);
 			setTaskListOrder(getTaskListOrder());//This is to keep the undo indexes in order
 		});
 	}
@@ -685,7 +754,8 @@ $(function() {
 			$('.category-list a.active').removeClass('active');
 			if (!$(this).hasClass('active')) {
 				$(this).addClass('active');
-				var categoryName = $(this).text();
+				var categoryName = $(this).get(0).lastChild.nodeValue;
+				console.log('selected category ' + categoryName);
 				localStorage.setItem('selectedCategory',categoryName);
 				if(ALL_CATEGORIES_LABEL===categoryName || UNASSIGNED_CATEGORIES_LABEL===categoryName){
 					$('#renameCategoryButton').attr('disabled','disabled');
@@ -742,14 +812,70 @@ $(function() {
 		$('#statsTotalTaskCount').text(newTaskCount+startedTaskCount+completedTaskCount);
 	}
 	
+	/**
+	 * Initialize the jQuery UI sortable lists.  Allow drag and drop onto categories.
+	 */
 	var initializeSortableLists = function() {
 		$( TASK_LIST_ID +',' + COMPLETED_TASK_LIST_ID ).sortable({
 			cancel : 'span',
-			containment: '#taskListContainer',
+			containment: 'body',
 			update: function(event, ui) {
-				setDirty(true);
 				setTaskList(getTaskList());//This is to keep the undo indexes in order
-				saveTaskListOrder(isAutosaveEnabled());
+				saveTaskListOrder();
+			},
+			start: function( event, ui ) {
+
+				// Use coordinates to track if the dragged item goes over a category
+				var mousex, mousey, coordinates = [];
+				
+				$(".category-list a").each(function() {
+					var categoryName = $(this).get(0).lastChild.nodeValue;
+					if(ALL_CATEGORIES_LABEL !== categoryName && UNASSIGNED_CATEGORIES_LABEL !== categoryName){
+						var lefttop = $(this).offset();
+						// and save them in a container for later access
+						coordinates.push({
+							dom: $(this),
+							left: lefttop.left,
+							top: lefttop.top,
+							right: lefttop.left + $(this).outerWidth(),
+							bottom: lefttop.top + $(this).outerHeight()
+						});
+					}
+				});
+
+				var continueDragging = function(e) {
+
+					// Check if we hit any boxes
+					for (var i in coordinates) {
+						if (mousex >= coordinates[i].left && mousex <= coordinates[i].right) {
+							if (mousey >= coordinates[i].top && mousey <= coordinates[i].bottom) {
+								// Yes, the mouse is on a droppable area
+								// Lets change the background color
+								coordinates[i].dom.addClass("highlighted-category");
+								continue;
+							}
+						}
+							// Nope, we did not hit any objects yet
+						coordinates[i].dom.removeClass("highlighted-category");
+					}
+
+					// Keep the last positions of the mouse coord.s
+					mousex = e.pageX;
+					mousey = e.pageY;
+				}
+				
+				$(document).bind("mousemove", continueDragging);
+			},
+			stop: function( event, ui ) {
+				$(document).unbind("mousemove");
+				
+				if($('.category-list a.highlighted-category').length){
+					// A category was selected
+					var categoryName = $('.category-list a.highlighted-category').get(0).lastChild.nodeValue;
+					var taskId = ui.item.attr('id');
+					addCategoryToTask(categoryName, taskId);
+					$('.category-list a').removeClass('highlighted-category');
+				}
 			}
 		});
 	}
@@ -804,7 +930,21 @@ $(function() {
 				}
 			}
 		}
-		//console.log('populateTaskList done');
+		
+		// Setup on hover styles
+		$('[id^=sortable] li').mouseenter( function () {
+			$(this).addClass('selected-task') ;
+		});
+		$('[id^=sortable] li').mouseleave( function () {
+			// Remove the hover style if there aren't any context menus open
+			if(!$('#context-menu-layer').length) {
+				$(this).removeClass('selected-task');
+				// if the context menu closes, then remove the style
+				$(document.body).on("contextmenu:hide", 
+					function(e){ $('[id^=sortable] li.selected-task').removeClass('selected-task'); });
+			}
+		});
+		
 		updateStatistics();
 	}
 	// End of function declaration
@@ -814,7 +954,6 @@ $(function() {
 	
 	console.log('Initialization');
 	clearLocalStorage();
-	loadCategories();
 	localStorage.setItem('taskListIndex',-1);
 	localStorage.setItem('taskListOrderIndex',-1);
 	loadData();
@@ -824,8 +963,8 @@ $(function() {
 	 ********************/
 	
 	/* Hook up the buttons inside each task */
-	$('[id^=sortable]').on('click','li div div span', function () {
-		var parentContainer = $(this).parent().parent().parent();
+	$('[id^=sortable]').on('click','li div span', function () {
+		var parentContainer = $(this).parent().parent();
 		var taskId = parentContainer.attr('id');
 		var buttonClicked = $(this).attr('class');
 		var taskList = getTaskList();
@@ -853,11 +992,13 @@ $(function() {
 		} else if('remove-button' == buttonClicked){
 			parentContainer.remove();
 			delete taskList[taskId];
+			// load categorizedTasks after save
+			saveAll(taskList, function() { loadCategorizedTasks(); });
+			return;
 		} else {
 			return;
 		}
-		setDirty(true);
-		saveAll(taskList,isAutosaveEnabled());
+		saveAll(taskList);
 	});
 	
 	/* Hook up the task label to toggle showing of overflow text */
@@ -888,23 +1029,7 @@ $(function() {
 			state: 'new',
 		};
 		
-		var taskList = getTaskList();
-		taskList[id] = tempTaskItem;
-		addTaskToDisplay(tempTaskItem);
-		setDirty(true);
-		//Scroll to the item
-		//$('html, body').animate({
-		//	scrollTop: $('#'+id).offset().top
-		//}, 'slow');
-		saveAll(taskList,isAutosaveEnabled());
-		$('#addTaskTextField').val('');
-		$(this).prop('disabled',true);
-		
-		// Add it to the selected category
-		var selectedCategory = localStorage.getItem('selectedCategory');
-		if(selectedCategory && selectedCategory != ALL_CATEGORIES_LABEL && selectedCategory != UNASSIGNED_CATEGORIES_LABEL){
-			addCategoryToTask(selectedCategory, id);
-		}
+		addTaskItem(tempTaskItem);
 	});
 	
 	/* Hook up the Save button */
@@ -915,14 +1040,12 @@ $(function() {
 	
 	/* Hook up the Export button */
 	$('#exportButton').click(function (e) {
-		e.preventDefault();
-		var contents = JSON.stringify(getTaskList()) + '\n' + JSON.stringify(getTaskListOrder());
-		if(contents){
-			var dateString = $.datepicker.formatDate('yy-mm-dd', new Date());
-			downloadFile('task-list-'+dateString+'.txt', contents);
-		} else {
-			alert("Nothing to export");
-		}
+		var exportObject = {};
+		$.each(localStorage, function(key, value){
+			exportObject[key] = value;
+		});
+		var dateString = $.datepicker.formatDate('yy-mm-dd', new Date());
+		downloadFile('task-list-'+dateString+'.txt', JSON.stringify(exportObject));
 	});
 	
 	/* Listen for a file selection from the Import button */
@@ -941,23 +1064,21 @@ $(function() {
 		else {
 			var fileReader = new FileReader();
 			fileReader.onload = function handleFileImport() {
-				var resultArray = fileReader.result.split('\n');
-				if(resultArray.length == 2) {
-					var taskList = resultArray[0];
-					var taskListOrder = resultArray[1];
-					try{
-						JSON.parse(taskList);
-						JSON.parse(taskListOrder);
-					} catch(err) {
-						alert('File contents not supported. Code J');
-						return;
-					}
-					setTaskList(JSON.parse(taskList));
-					setTaskListOrder(JSON.parse(taskListOrder));
-					setDirty(true);
-					populateTaskList();
-				} else {
-					alert('File contents not supported. Code N');
+			$(".btn-file :file").val(""); //Clear the selection text, so another upload of the same file can occur
+				try {
+					var importedObject = JSON.parse(fileReader.result);
+					var taskListNumber = -1;
+					
+					var taskListName = 'taskList-' + importedObject.taskListIndex;
+					var taskListOrderName = 'taskListOrder-' + importedObject.taskListOrderIndex;
+					
+					$.each(JSON.parse(importedObject[taskListOrderName]), function( index, element ) {
+						var taskList = JSON.parse(importedObject[taskListName]);
+						addTaskItem(taskList[element]);
+					});
+				} catch(err) {
+					alert('File contents not supported.');
+					return;
 				}
 			}   
 			fileReader.readAsText(input.files[0]);
@@ -968,7 +1089,7 @@ $(function() {
 	/* Hook up the Clear All button */
 	$('#clearAllButton').click(function (e) {
 		e.preventDefault();
-		saveAll({},isAutosaveEnabled());
+		saveAll({});
 		populateTaskList();
 	});
 	
@@ -982,10 +1103,10 @@ $(function() {
 			localStorage.setItem('taskListIndex',previousTaskListIndex);
 			localStorage.setItem('taskListOrderIndex',previousTaskListOrderIndex);
 			populateTaskList();
-			if(isAutosaveEnabled()) {
-				saveTaskListToDatabase(getTaskList());
-				saveTaskListOrderToDatabase(getTaskListOrder());
-			}
+
+			saveTaskListToDatabase(getTaskList());
+			saveTaskListOrderToDatabase(getTaskListOrder());
+
 			$('#redoButton').removeAttr('disabled');
 			if((previousTaskListIndex == 0) || (previousTaskListOrderIndex ==0)){
 				$('#undoButton').attr('disabled','disabled');
@@ -1003,10 +1124,10 @@ $(function() {
 			localStorage.setItem('taskListIndex',nextTaskListIndex);
 			localStorage.setItem('taskListOrderIndex',nextTaskListOrderIndex);
 			populateTaskList();
-			if(isAutosaveEnabled()) {
-				saveTaskListToDatabase(getTaskList());
-				saveTaskListOrderToDatabase(getTaskListOrder());
-			}
+
+			saveTaskListToDatabase(getTaskList());
+			saveTaskListOrderToDatabase(getTaskListOrder());
+
 			$('#undoButton').removeAttr('disabled');
 			//Check if the next indices exist. If not, disable redo button
 			if(!(localStorage.getItem('taskList-'+(nextTaskListIndex+1)) && localStorage.getItem('taskListOrder-'+(nextTaskListOrderIndex+1)))){
@@ -1063,12 +1184,12 @@ $(function() {
             console.log('key: '+key);
 			
 			if(key.match('^'+ADD_CATEGORY_PREFIX)){
-				var taskId = $(this).parent().attr('id');
+				var taskId = $(this).attr('id');
 				var categoryName = key.replace(ADD_CATEGORY_PREFIX,'');
 				addCategoryToTask(categoryName, taskId);
 			} else if(key.match('^'+DELETE_CATEGORY_PREFIX)){
 				console.log('delete category to task');
-				var taskId = $(this).parent().attr('id');
+				var taskId = $(this).attr('id');
 				var categoryName = key.replace(DELETE_CATEGORY_PREFIX,'');
 				removeCategoryFromTask(categoryName, taskId);
 			}
@@ -1077,7 +1198,7 @@ $(function() {
 			else if('edit-name'===key){
 				$(TASK_LIST_ID +',' + COMPLETED_TASK_LIST_ID).sortable('destroy');
 				// Change the label into an input field
-				var taskLabel = $(this).parent().find('.taskLabel');
+				var taskLabel = $(this).find('.taskLabel');
 				var originalText = taskLabel.text();
 				taskLabel.text('');
 				taskLabel.append("<div id='removableDiv'><input id='editTaskLabel' class='sortable-input' value='"+originalText+"'></input></div>");
@@ -1090,10 +1211,9 @@ $(function() {
 					taskLabel.find('.removableDiv').remove();
 					taskLabel.text(inputFieldText);
 					if(originalText!=inputFieldText){
-						setDirty(true);
 						var taskList = getTaskList();
-						taskList[taskLabel.parent().parent().parent().attr('id')].task_name = inputFieldText;
-						saveTaskList(taskList,isAutosaveEnabled());
+						taskList[taskLabel.parent().parent().attr('id')].task_name = inputFieldText;
+						saveTaskList(taskList);
 						setTaskListOrder(getTaskListOrder());//This is to keep the undo indexes in order
 					}
 				}
@@ -1120,51 +1240,48 @@ $(function() {
 				});
 			} else if('change-to-small-task'==key){
 				//switch out icon
-				var span = $(this).parent().find('.taskLabelContainer span');
+				var span = $(this).find('.taskLabelContainer span');
 				var newClass = TASK_COMPLEXITY_CLASS.SMALL;
 				if(newClass != span.attr('class')){
 					span.removeClass();
 					span.addClass(newClass);
 					//save new state
-					setDirty(true);
 					var taskList = getTaskList();
-					taskList[span.parent().parent().parent().attr('id')].complexity = TASK_COMPLEXITY_VALUE.SMALL;
-					saveTaskList(taskList,isAutosaveEnabled());
+					taskList[span.parent().parent().attr('id')].complexity = TASK_COMPLEXITY_VALUE.SMALL;
+					saveTaskList(taskList);
 					setTaskListOrder(getTaskListOrder());//This is to keep the undo indexes in order
 				}
 			} else if('change-to-medium-task'==key){
 				//switch out icon
-				var span = $(this).parent().find('.taskLabelContainer span');
+				var span = $(this).find('.taskLabelContainer span');
 				var newClass = TASK_COMPLEXITY_CLASS.MEDIUM;
 				if(newClass != span.attr('class')){
 					span.removeClass();
 					span.addClass(newClass);
 					//save new state
-					setDirty(true);
 					var taskList = getTaskList();
-					taskList[span.parent().parent().parent().attr('id')].complexity = TASK_COMPLEXITY_VALUE.MEDIUM;
-					saveTaskList(taskList,isAutosaveEnabled());
+					taskList[span.parent().parent().attr('id')].complexity = TASK_COMPLEXITY_VALUE.MEDIUM;
+					saveTaskList(taskList);
 					setTaskListOrder(getTaskListOrder());//This is to keep the undo indexes in order
 				}
 			} else if('change-to-large-task'==key){
 				//switch out icon
-				var span = $(this).parent().find('.taskLabelContainer span');
+				var span = $(this).find('.taskLabelContainer span');
 				var newClass = TASK_COMPLEXITY_CLASS.LARGE;
 				if(newClass != span.attr('class')){
 					span.removeClass();
 					span.addClass(newClass);
 					//save new state
-					setDirty(true);
 					var taskList = getTaskList();
-					taskList[span.parent().parent().parent().attr('id')].complexity = TASK_COMPLEXITY_VALUE.LARGE;
-					saveTaskList(taskList,isAutosaveEnabled());
+					taskList[span.parent().parent().attr('id')].complexity = TASK_COMPLEXITY_VALUE.LARGE;
+					saveTaskList(taskList);
 					setTaskListOrder(getTaskListOrder());//This is to keep the undo indexes in order
 				}
 			}
         },
 		//build a dynamic context menu
 		build: function(element, event) {
-			var taskId = element.parent().attr('id');
+			var taskId = element.attr('id');
 			return {
                 items: {
 					"edit-name": {name: "Edit Name", icon: "edit"},
@@ -1227,20 +1344,18 @@ $(function() {
 		e.preventDefault();
 		var categoryName = $('#newCategoryTextField').val();
 		
-		$('.category-list').append('<a class="unselectable list-group-item">'+ categoryName +'</a>');
+		$('.category-list').append('<a class="unselectable list-group-item"><span class="badge">0</span>'+ categoryName +'</a>');
 		attachCategoryListButtons();
 		
 		$('#newCategoryTextField').val('');
 		$(this).prop('disabled',true);
-		setDirty(true);
 		addCategory(categoryName);
 	});
 	
 	/* Hook up the Delete Category button */
 	$('#deleteCategoryButton').click(function (e) {
-		var categoryText = $('.category-list a.active').text();
+		var categoryText = $('.category-list a.active').get(0).lastChild.nodeValue;
 		console.log('deleting ' + categoryText);
-		setDirty(true);
 		deleteCategory(categoryText);
 		e.preventDefault();
 	});
@@ -1248,8 +1363,8 @@ $(function() {
 	/* Hook up the Rename Category button */
 	$('#renameCategoryButton').click(function (e) {
 		var selectedCategory = $('.category-list a.active');
-		var categoryText = $('.category-list a.active').text();
-		selectedCategory.text('');
+		var categoryText = $('.category-list a.active').get(0).lastChild.nodeValue;
+		selectedCategory.get(0).lastChild.nodeValue = '';
 		selectedCategory.append("<div id='removableDiv'><input id='editTaskLabel' class='category-input form-control' value='"+categoryText+"'></input></div>");
 		var inputField = selectedCategory.find('.category-input');
 		setCaretAtEnd(inputField);
@@ -1260,9 +1375,9 @@ $(function() {
 			var inputFieldText = inputField.val();
 			selectedCategory.find('.removableDiv').remove();
 			if(isCategoryNameInUse(inputFieldText)){
-				selectedCategory.text(categoryText);
+				selectedCategory.get(0).lastChild.nodeValue = categoryText;
 			} else {
-				selectedCategory.text(inputFieldText);
+				selectedCategory.get(0).lastChild.nodeValue = inputFieldText;
 				renameCategory(categoryText, inputFieldText);
 			}
 		});
@@ -1273,9 +1388,9 @@ $(function() {
 				var inputFieldText = inputField.val();
 				selectedCategory.find('.removableDiv').remove();
 				if(isCategoryNameInUse(inputFieldText)){
-					selectedCategory.text(categoryText);
+					selectedCategory.get(0).lastChild.nodeValue = categoryText;
 				} else {
-					selectedCategory.text(inputFieldText);
+					selectedCategory.get(0).lastChild.nodeValue = inputFieldText;
 					renameCategory(categoryText, inputFieldText);
 				}
 			}

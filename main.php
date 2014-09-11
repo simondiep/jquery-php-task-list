@@ -87,8 +87,6 @@
 				<!-- Collect the nav links, forms, and other content for toggling -->
 			<div class="collapse navbar-collapse" id="navbar-collapse-1">
 				<ul class="nav navbar-nav">
-					<li style='display:none'><label class="navbar-text"><input id="autosaveCheckbox" type="checkbox" checked> Auto-save</label></li>
-					<li style='display:none'><button id='saveButton' class="btn btn-default navbar-btn">Save Now</button></li>
 					<li style='display:none'><button id='exportButton' class="btn btn-default navbar-btn">Export</button></li>
 					<li style='display:none'><span class="btn btn-default navbar-btn btn-file">Import<input type="file" id='importFileInput' accept=".txt"></span></li>
 					<li><button id='clearAllButton' class="btn btn-default navbar-btn">Clear All</button></li>
