@@ -14,24 +14,24 @@
         die("Redirecting to signin.php"); 
     } 
 
-	$query = " 
-		INSERT INTO task_list_order (user_id,task_list_order) 
-		VALUES (:user_id,:task_list_order)
-		ON DUPLICATE KEY UPDATE task_list_order = VALUES(task_list_order)";
+    $query = " 
+        INSERT INTO task_list_order (user_id,task_list_order) 
+        VALUES (:user_id,:task_list_order)
+        ON DUPLICATE KEY UPDATE task_list_order = VALUES(task_list_order)";
  
-	try 
-	{ 
-		// Execute the query 
-		$stmt = $db->prepare($query); 
-		$stmt->bindParam(':user_id', $_SESSION['user']['id']);
-		$stmt->bindParam(':task_list_order', $_POST['task_list_order']);
-		$result = $stmt->execute(); 
-	} 
-	catch(PDOException $ex) 
-	{ 
-		error_log($ex);
-		// Note: On a production website, you should not output $ex->getMessage(). 
-		// It may provide an attacker with helpful information about your code.  
-		die("Failed to run query: " . $ex->getMessage()); 
-	}
+    try 
+    { 
+        // Execute the query 
+        $stmt = $db->prepare($query); 
+        $stmt->bindParam(':user_id', $_SESSION['user']['id']);
+        $stmt->bindParam(':task_list_order', $_POST['task_list_order']);
+        $result = $stmt->execute(); 
+    } 
+    catch(PDOException $ex) 
+    { 
+        error_log($ex);
+        // Note: On a production website, you should not output $ex->getMessage(). 
+        // It may provide an attacker with helpful information about your code.  
+        die("Failed to run query: " . $ex->getMessage()); 
+    }
 ?>

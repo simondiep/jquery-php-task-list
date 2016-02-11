@@ -14,21 +14,21 @@
         die("Redirecting to signin.php"); 
     } 
 
-	$query = "DELETE FROM category WHERE user_id = :user_id AND name = :category_name";
-	
-	try 
-	{ 
-		// Execute the query 
-		$stmt = $db->prepare($query); 
-		$stmt->bindParam(':category_name', $_POST['category_name']);
-		$stmt->bindParam(':user_id', $_SESSION['user']['id']);
-		$result = $stmt->execute(); 
-	} 
-	catch(PDOException $ex) 
-	{ 
-		error_log($ex);
-		// Note: On a production website, you should not output $ex->getMessage(). 
-		// It may provide an attacker with helpful information about your code.  
-		die("Failed to run query: " . $ex->getMessage()); 
-	}
+    $query = "DELETE FROM category WHERE user_id = :user_id AND name = :category_name";
+    
+    try 
+    { 
+        // Execute the query 
+        $stmt = $db->prepare($query); 
+        $stmt->bindParam(':category_name', $_POST['category_name']);
+        $stmt->bindParam(':user_id', $_SESSION['user']['id']);
+        $result = $stmt->execute(); 
+    } 
+    catch(PDOException $ex) 
+    { 
+        error_log($ex);
+        // Note: On a production website, you should not output $ex->getMessage(). 
+        // It may provide an attacker with helpful information about your code.  
+        die("Failed to run query: " . $ex->getMessage()); 
+    }
 ?>

@@ -1,4 +1,4 @@
-# online-task-list
+# jquery-php-mysql-task-list
 A full-stack Task List application using JavaScript, JQuery, PHP, and MySQL.
 
 - Log-in

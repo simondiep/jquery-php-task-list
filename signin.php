@@ -21,7 +21,7 @@
                 password, 
                 salt, 
                 email,
-				background_class
+                background_class
             FROM user 
             WHERE 
                 username = :username 
@@ -109,36 +109,36 @@
      
 ?> 
 <head>
-	<meta name="viewport" content="initial-scale=1.0">
-	<meta charset="utf-8">
-	<title>Task List</title>
-	<link rel="stylesheet" href="css/index.css" />
-	<!--<link rel="stylesheet" href="css/jquery.mobile-1.4.2.min.css">-->
-	<link rel="stylesheet" type="text/css" href="css/bootstrap.css" media="screen" />
-	<link rel="icon" href="assets/favicon.ico" type="image/x-icon" />
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <title>Task List</title>
+    <link rel="stylesheet" href="css/index.css" />
+    <!--<link rel="stylesheet" href="css/jquery.mobile-1.4.2.min.css">-->
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css" media="screen" />
+    <link rel="icon" href="assets/favicon.ico" type="image/x-icon" />
 </head> 
 <body class="lighted-night-background">
-	<header>
-		<?php if ((!empty($_POST)) && !($login_ok) && ('http://sogeti-redmine.cloudapp.net/task-list/signin.php' == $_SERVER['HTTP_REFERER'])): ?>
-			<h1>Sign In failed.  Please try again</h1>
-		<?php else: ?>
-			<h1>Sign In</h1>
-		<?php endif; ?>
-	</header>
-	<div class="container-narrow">
-		<form action="signin.php" method="post"> 
-			<div class="form-group">
-				<label class="sr-only" for="usernameTextField">Username</label>
-				<input name="username" type="username" class="form-control" id="usernameTextField" placeholder="Enter username" value="<?php echo $submitted_username; ?>">
-			</div>
-			<div class="form-group">
-				<label class="sr-only" for="passwordTextField">Password</label>
-				<input name="password" type="password" class="form-control" id="passwordTextField" placeholder="Password">
-			</div>
-			<button id='saveButton' type="submit" class="btn btn-default pull-right">Sign In</button>
-		</form>
-		<div class='btn-toolbar'>
-			<button id='registerButton' class="btn btn-default pull-left" onclick="location.href = 'register.php'">Register</button>
-		</div>
-	</div>
+    <header>
+        <?php if ((!empty($_POST)) && !($login_ok) && ('https://jquery-php-task-list.herokuapp.com/signin.php' == $_SERVER['HTTP_REFERER'])): ?>
+            <h1>Sign In failed.  Please try again</h1>
+        <?php else: ?>
+            <h1>Sign In</h1>
+        <?php endif; ?>
+    </header>
+    <div class="container-narrow">
+        <form action="signin.php" method="post"> 
+            <div class="form-group">
+                <label class="sr-only" for="usernameTextField">Username</label>
+                <input name="username" type="username" class="form-control" id="usernameTextField" placeholder="Enter username" value="<?php echo $submitted_username; ?>">
+            </div>
+            <div class="form-group">
+                <label class="sr-only" for="passwordTextField">Password</label>
+                <input name="password" type="password" class="form-control" id="passwordTextField" placeholder="Password">
+            </div>
+            <button id='saveButton' type="submit" class="btn btn-default pull-right">Sign In</button>
+        </form>
+        <div class='btn-toolbar'>
+            <button id='registerButton' class="btn btn-default pull-left" onclick="location.href = 'register.php'">Register</button>
+        </div>
+    </div>
 </body>

@@ -6,15 +6,15 @@
     // At the top of the page we check to see whether the user is logged in or not 
     if(empty($_SESSION['user'])) 
     { 
-		// if not logged in, return back empty
+        // if not logged in, return back empty
         die("");
     } 
      
     // Everything below this point in the file is secured by the login system 
-	$query = "SELECT c.name, ct.task_id FROM category c INNER JOIN categorized_task ct ON c.id=ct.category_id  WHERE user_id = :user_id"; 
+    $query = "SELECT c.name, ct.task_id FROM category c INNER JOIN categorized_task ct ON c.id=ct.category_id  WHERE user_id = :user_id"; 
     $query_params = array( 
-		':user_id' => $_SESSION['user']['id'], 
-	);
+        ':user_id' => $_SESSION['user']['id'], 
+    );
     try 
     { 
         // These two statements run the query against your database table. 
@@ -29,13 +29,13 @@
     } 
          
     // Retrieve results (if any) 
-	$result = $stmt->fetchAll(); 
-	if($result) 
-	{ 
-		echo json_encode($result);
-	}
-	else
-	{
-		echo "";
-	}
+    $result = $stmt->fetchAll(); 
+    if($result) 
+    { 
+        echo json_encode($result);
+    }
+    else
+    {
+        echo "";
+    }
 ?>

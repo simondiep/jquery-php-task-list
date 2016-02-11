@@ -37,9 +37,9 @@
         die("Failed to connect to the database: " . $ex->getMessage()); 
     } 
     
-	// Use real prepared statements rather than emulation (emulation exposes sql injection)
-	$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);	
-	
+    // Use real prepared statements rather than emulation (emulation exposes sql injection)
+    $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);   
+    
     // This statement configures PDO to throw an exception when it encounters 
     // an error.  This allows us to use try/catch blocks to trap database errors. 
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); 

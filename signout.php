@@ -9,3 +9,4 @@
     // We redirect them to the login page 
     header("Location: signin.php"); 
     die("Redirecting to: signin.php");
+?>
