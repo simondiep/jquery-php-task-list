@@ -1,10 +1,10 @@
 <?php 
 
     // These variables define the connection information for your MySQL database 
-    $username = "task_list"; 
-    $password = "task_list"; 
-    $host = "localhost"; 
-    $dbname = "task_list"; 
+    $username = getenv('mysql_username');
+    $password = getenv('mysql_password');
+    $host = getenv('mysql_host');
+    $dbname = getenv('mysql_dbname');
 
     // UTF-8 is a character encoding scheme that allows you to conveniently store 
     // a wide varienty of special characters, like ¢ or €, in your database. 

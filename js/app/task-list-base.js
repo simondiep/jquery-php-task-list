@@ -53,7 +53,7 @@ $(function() {
     var ADD_CATEGORY_PREFIX = 'add-';
     var DELETE_CATEGORY_PREFIX = 'delete-';
     
-    var HOST_PREFIX = "http://YOUR-HOST/task-list/";
+    var HOST_PREFIX = "https://jquery-php-task-list.herokuapp.com/";
     
     var GET_TASK_LIST_URL = HOST_PREFIX+"get-task-list.php";
     var SAVE_TASK_LIST_URL = HOST_PREFIX+"save-task-list.php";
