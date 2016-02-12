@@ -1072,10 +1072,16 @@ $(function() {
                     var taskListName = 'taskList-' + importedObject.taskListIndex;
                     var taskListOrderName = 'taskListOrder-' + importedObject.taskListOrderIndex;
                     
+                    // TODO remove all categories and categoryToTasks from DB and localStorage
+                    // TODO save new imported categories to DB and localStorage
+                    
                     $.each(JSON.parse(importedObject[taskListOrderName]), function( index, element ) {
                         var taskList = JSON.parse(importedObject[taskListName]);
                         addTaskItem(taskList[element]);
                     });
+                    
+                    // TODO save new imported categoryToTasks to DB and localStorage
+
                 } catch(err) {
                     alert('File contents not supported.');
                     return;

@@ -14,4 +14,5 @@ Live Demo [Here](https://jquery-php-task-list.herokuapp.com)
 - Click to expand long text items
 - Scalable UI with Bootstrap library
 
+Known issues: The categories feature currently does not fully work with the Import and Export buttons.
 Disclaimer: This application was one of my first jQuery/PHP web applications, developed in 2014, and may not be up to date on coding standards and best practices.

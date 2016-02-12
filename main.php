@@ -87,9 +87,9 @@
                 <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    <li style='display:none'><button id='exportButton' class="btn btn-default navbar-btn">Export</button></li>
-                    <li style='display:none'><span class="btn btn-default navbar-btn btn-file">Import<input type="file" id='importFileInput' accept=".txt"></span></li>
-                    <li><button id='clearAllButton' class="btn btn-default navbar-btn">Clear All</button></li>
+                    <li style='display:initial'><button id='exportButton' class="btn btn-default navbar-btn">Export</button></li>
+                    <li style='display:initial'><span class="btn btn-default navbar-btn btn-file">Import<input type="file" id='importFileInput' accept=".txt"></span></li>
+                    <li><button id='clearAllButton' class="btn btn-default navbar-btn">Clear Tasks</button></li>
                     <li><button id='undoButton' class="btn btn-default navbar-btn" disabled='disabled'>Undo</button></li>
                     <li><button id='redoButton' class="btn btn-default navbar-btn" disabled='disabled'>Redo</button></li>
                 </ul>
