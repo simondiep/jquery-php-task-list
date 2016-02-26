@@ -1,6 +1,5 @@
 # jquery-php-mysql-task-list
 A full-stack Task List application using JavaScript, JQuery, PHP, and MySQL.  
-Live Demo [Here](https://jquery-php-task-list.herokuapp.com)
 
 - Log-in
 - Account management
